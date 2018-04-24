@@ -1158,13 +1158,13 @@ export let BindingBehavior = class BindingBehavior extends Expression {
 };
 
 export let ValueConverter = class ValueConverter extends Expression {
-  constructor(expression, name, args, allArgs) {
+  constructor(expression, name, args) {
     super();
 
     this.expression = expression;
     this.name = name;
     this.args = args;
-    this.allArgs = allArgs;
+    this.allArgs = [expression].concat(args);
   }
 
   evaluate(scope, lookupFunctions) {
@@ -2158,7 +2158,7 @@ export let ParserImplementation = class ParserImplementation {
         args.push(this.parseExpression());
       }
 
-      result = new ValueConverter(result, name, args, [result].concat(args));
+      result = new ValueConverter(result, name, args);
     }
 
     return result;
@@ -2207,11 +2207,11 @@ export let ParserImplementation = class ParserImplementation {
   parseBinary(minPrecedence) {
     let left = this.parseUnary();
 
-    if ((this.token & T_IsBinaryOp) !== T_IsBinaryOp) {
+    if ((this.token & T_BinaryOperator) !== T_BinaryOperator) {
       return left;
     }
 
-    while ((this.token & T_IsBinaryOp) === T_IsBinaryOp) {
+    while ((this.token & T_BinaryOperator) === T_BinaryOperator) {
       const opToken = this.token;
       const precedence = opToken & T_Precedence;
       if (precedence < minPrecedence) {
@@ -2225,7 +2225,7 @@ export let ParserImplementation = class ParserImplementation {
 
   parseUnary() {
     const opToken = this.token;
-    if ((opToken & T_IsUnaryOp) === T_IsUnaryOp) {
+    if ((opToken & T_UnaryOperator) === T_UnaryOperator) {
       this.nextToken();
       switch (opToken) {
         case T_Add:
@@ -2637,7 +2637,7 @@ export let ParserImplementation = class ParserImplementation {
         if (char === $u) {
           let hex = this.input.slice(this.index + 1, this.index + 5);
 
-          if (!/[A-Z0-9]{4}/.test(hex)) {
+          if (!/[A-Z0-9]{4}/i.test(hex)) {
             this.error(`Invalid unicode escape [\\u${hex}]`);
           }
 
@@ -2787,7 +2787,7 @@ const T_TokenMask = (1 << 6) - 1;
 
 const T_PrecedenceShift = 6;
 
-const T_Precedence = 7 << 6;
+const T_Precedence = 7 << T_PrecedenceShift;
 
 const T_ClosingToken = 1 << 9;
 
@@ -2796,8 +2796,8 @@ const T_EndOfSource = 1 << 11 | T_AccessScopeTerminal;
 const T_Identifier = 1 << 12;
 const T_NumericLiteral = 1 << 13;
 const T_StringLiteral = 1 << 14;
-const T_IsBinaryOp = 1 << 15;
-const T_IsUnaryOp = 1 << 16;
+const T_BinaryOperator = 1 << 15;
+const T_UnaryOperator = 1 << 16;
 
 const T_FalseKeyword = 0;
 const T_TrueKeyword = 1;
@@ -2822,24 +2822,24 @@ const T_DoubleQuote = 18;
 
 const T_BindingBehavior = 19 | T_AccessScopeTerminal;
 const T_ValueConverter = 20 | T_AccessScopeTerminal;
-const T_LogicalOr = 21 | T_IsBinaryOp | 1 << T_PrecedenceShift;
-const T_LogicalAnd = 22 | T_IsBinaryOp | 2 << T_PrecedenceShift;
-const T_BitwiseXor = 23 | T_IsBinaryOp | 3 << T_PrecedenceShift;
-const T_LooseEqual = 24 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-const T_LooseNotEqual = 25 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-const T_StrictEqual = 26 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-const T_StrictNotEqual = 27 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-const T_LessThan = 28 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-const T_GreaterThan = 29 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-const T_LessThanOrEqual = 30 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-const T_GreaterThanOrEqual = 31 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-const T_Add = 32 | T_IsUnaryOp | T_IsBinaryOp | 6 << T_PrecedenceShift;
-const T_Subtract = 33 | T_IsUnaryOp | T_IsBinaryOp | 6 << T_PrecedenceShift;
-const T_Multiply = 34 | T_IsBinaryOp | 7 << T_PrecedenceShift;
-const T_Modulo = 35 | T_IsBinaryOp | 7 << T_PrecedenceShift;
-const T_Divide = 36 | T_IsBinaryOp | 7 << T_PrecedenceShift;
+const T_LogicalOr = 21 | T_BinaryOperator | 1 << T_PrecedenceShift;
+const T_LogicalAnd = 22 | T_BinaryOperator | 2 << T_PrecedenceShift;
+const T_BitwiseXor = 23 | T_BinaryOperator | 3 << T_PrecedenceShift;
+const T_LooseEqual = 24 | T_BinaryOperator | 4 << T_PrecedenceShift;
+const T_LooseNotEqual = 25 | T_BinaryOperator | 4 << T_PrecedenceShift;
+const T_StrictEqual = 26 | T_BinaryOperator | 4 << T_PrecedenceShift;
+const T_StrictNotEqual = 27 | T_BinaryOperator | 4 << T_PrecedenceShift;
+const T_LessThan = 28 | T_BinaryOperator | 5 << T_PrecedenceShift;
+const T_GreaterThan = 29 | T_BinaryOperator | 5 << T_PrecedenceShift;
+const T_LessThanOrEqual = 30 | T_BinaryOperator | 5 << T_PrecedenceShift;
+const T_GreaterThanOrEqual = 31 | T_BinaryOperator | 5 << T_PrecedenceShift;
+const T_Add = 32 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+const T_Subtract = 33 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+const T_Multiply = 34 | T_BinaryOperator | 7 << T_PrecedenceShift;
+const T_Modulo = 35 | T_BinaryOperator | 7 << T_PrecedenceShift;
+const T_Divide = 36 | T_BinaryOperator | 7 << T_PrecedenceShift;
 const T_Assign = 37;
-const T_LogicalNot = 38 | T_IsUnaryOp;
+const T_LogicalNot = 38 | T_UnaryOperator;
 
 const KeywordLookup = Object.create(null, {
   true: { value: T_TrueKeyword },

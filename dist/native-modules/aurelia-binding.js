@@ -1211,7 +1211,7 @@ export var BindingBehavior = function (_Expression2) {
 export var ValueConverter = function (_Expression3) {
   _inherits(ValueConverter, _Expression3);
 
-  function ValueConverter(expression, name, args, allArgs) {
+  function ValueConverter(expression, name, args) {
     
 
     var _this5 = _possibleConstructorReturn(this, _Expression3.call(this));
@@ -1219,7 +1219,7 @@ export var ValueConverter = function (_Expression3) {
     _this5.expression = expression;
     _this5.name = name;
     _this5.args = args;
-    _this5.allArgs = allArgs;
+    _this5.allArgs = [expression].concat(args);
     return _this5;
   }
 
@@ -2339,7 +2339,7 @@ export var ParserImplementation = function () {
         args.push(this.parseExpression());
       }
 
-      result = new ValueConverter(result, name, args, [result].concat(args));
+      result = new ValueConverter(result, name, args);
     }
 
     return result;
@@ -2388,11 +2388,11 @@ export var ParserImplementation = function () {
   ParserImplementation.prototype.parseBinary = function parseBinary(minPrecedence) {
     var left = this.parseUnary();
 
-    if ((this.token & T_IsBinaryOp) !== T_IsBinaryOp) {
+    if ((this.token & T_BinaryOperator) !== T_BinaryOperator) {
       return left;
     }
 
-    while ((this.token & T_IsBinaryOp) === T_IsBinaryOp) {
+    while ((this.token & T_BinaryOperator) === T_BinaryOperator) {
       var opToken = this.token;
       var precedence = opToken & T_Precedence;
       if (precedence < minPrecedence) {
@@ -2406,7 +2406,7 @@ export var ParserImplementation = function () {
 
   ParserImplementation.prototype.parseUnary = function parseUnary() {
     var opToken = this.token;
-    if ((opToken & T_IsUnaryOp) === T_IsUnaryOp) {
+    if ((opToken & T_UnaryOperator) === T_UnaryOperator) {
       this.nextToken();
       switch (opToken) {
         case T_Add:
@@ -2818,7 +2818,7 @@ export var ParserImplementation = function () {
         if (char === $u) {
           var hex = this.input.slice(this.index + 1, this.index + 5);
 
-          if (!/[A-Z0-9]{4}/.test(hex)) {
+          if (!/[A-Z0-9]{4}/i.test(hex)) {
             this.error('Invalid unicode escape [\\u' + hex + ']');
           }
 
@@ -2972,7 +2972,7 @@ var T_TokenMask = (1 << 6) - 1;
 
 var T_PrecedenceShift = 6;
 
-var T_Precedence = 7 << 6;
+var T_Precedence = 7 << T_PrecedenceShift;
 
 var T_ClosingToken = 1 << 9;
 
@@ -2981,8 +2981,8 @@ var T_EndOfSource = 1 << 11 | T_AccessScopeTerminal;
 var T_Identifier = 1 << 12;
 var T_NumericLiteral = 1 << 13;
 var T_StringLiteral = 1 << 14;
-var T_IsBinaryOp = 1 << 15;
-var T_IsUnaryOp = 1 << 16;
+var T_BinaryOperator = 1 << 15;
+var T_UnaryOperator = 1 << 16;
 
 var T_FalseKeyword = 0;
 var T_TrueKeyword = 1;
@@ -3007,24 +3007,24 @@ var T_DoubleQuote = 18;
 
 var T_BindingBehavior = 19 | T_AccessScopeTerminal;
 var T_ValueConverter = 20 | T_AccessScopeTerminal;
-var T_LogicalOr = 21 | T_IsBinaryOp | 1 << T_PrecedenceShift;
-var T_LogicalAnd = 22 | T_IsBinaryOp | 2 << T_PrecedenceShift;
-var T_BitwiseXor = 23 | T_IsBinaryOp | 3 << T_PrecedenceShift;
-var T_LooseEqual = 24 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-var T_LooseNotEqual = 25 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-var T_StrictEqual = 26 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-var T_StrictNotEqual = 27 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-var T_LessThan = 28 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-var T_GreaterThan = 29 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-var T_LessThanOrEqual = 30 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-var T_GreaterThanOrEqual = 31 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-var T_Add = 32 | T_IsUnaryOp | T_IsBinaryOp | 6 << T_PrecedenceShift;
-var T_Subtract = 33 | T_IsUnaryOp | T_IsBinaryOp | 6 << T_PrecedenceShift;
-var T_Multiply = 34 | T_IsBinaryOp | 7 << T_PrecedenceShift;
-var T_Modulo = 35 | T_IsBinaryOp | 7 << T_PrecedenceShift;
-var T_Divide = 36 | T_IsBinaryOp | 7 << T_PrecedenceShift;
+var T_LogicalOr = 21 | T_BinaryOperator | 1 << T_PrecedenceShift;
+var T_LogicalAnd = 22 | T_BinaryOperator | 2 << T_PrecedenceShift;
+var T_BitwiseXor = 23 | T_BinaryOperator | 3 << T_PrecedenceShift;
+var T_LooseEqual = 24 | T_BinaryOperator | 4 << T_PrecedenceShift;
+var T_LooseNotEqual = 25 | T_BinaryOperator | 4 << T_PrecedenceShift;
+var T_StrictEqual = 26 | T_BinaryOperator | 4 << T_PrecedenceShift;
+var T_StrictNotEqual = 27 | T_BinaryOperator | 4 << T_PrecedenceShift;
+var T_LessThan = 28 | T_BinaryOperator | 5 << T_PrecedenceShift;
+var T_GreaterThan = 29 | T_BinaryOperator | 5 << T_PrecedenceShift;
+var T_LessThanOrEqual = 30 | T_BinaryOperator | 5 << T_PrecedenceShift;
+var T_GreaterThanOrEqual = 31 | T_BinaryOperator | 5 << T_PrecedenceShift;
+var T_Add = 32 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+var T_Subtract = 33 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+var T_Multiply = 34 | T_BinaryOperator | 7 << T_PrecedenceShift;
+var T_Modulo = 35 | T_BinaryOperator | 7 << T_PrecedenceShift;
+var T_Divide = 36 | T_BinaryOperator | 7 << T_PrecedenceShift;
 var T_Assign = 37;
-var T_LogicalNot = 38 | T_IsUnaryOp;
+var T_LogicalNot = 38 | T_UnaryOperator;
 
 var KeywordLookup = Object.create(null, {
   true: { value: T_TrueKeyword },

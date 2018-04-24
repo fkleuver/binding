@@ -3,7 +3,7 @@
 System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aurelia-metadata'], function (_export, _context) {
   "use strict";
 
-  var LogManager, PLATFORM, DOM, TaskQueue, metadata, _typeof, _dec, _dec2, _class, _dec3, _class2, _dec4, _class3, _dec5, _class5, _dec6, _class7, _dec7, _class8, _dec8, _class9, _dec9, _class10, _class12, _temp, _dec10, _class13, _class14, _temp2, targetContext, sourceContext, map, slotNames, versionSlotNames, i, queue, queued, nextId, minimumImmediate, frameBudget, isFlushRequested, immediate, arrayPool1, arrayPool2, poolUtilization, ExpressionObserver, EDIT_LEAVE, EDIT_UPDATE, EDIT_ADD, EDIT_DELETE, arraySplice, ModifyCollectionObserver, CollectionLengthObserver, pop, push, reverse, shift, sort, splice, unshift, ModifyArrayObserver, Expression, Chain, BindingBehavior, ValueConverter, Assign, Conditional, AccessThis, AccessScope, AccessMember, AccessKeyed, CallScope, CallMember, CallFunction, Binary, PrefixNot, LiteralPrimitive, LiteralString, LiteralArray, LiteralObject, _Unparser, ExpressionCloner, bindingMode, Parser, ParserImplementation, $EOF, $TAB, $LF, $VTAB, $FF, $CR, $SPACE, $BANG, $DQ, $$, $PERCENT, $AMPERSAND, $SQ, $LPAREN, $RPAREN, $STAR, $PLUS, $COMMA, $MINUS, $PERIOD, $SLASH, $COLON, $SEMICOLON, $LT, $EQ, $GT, $QUESTION, $0, $9, $A, $E, $Z, $LBRACKET, $BACKSLASH, $RBRACKET, $CARET, $_, $a, $e, $f, $n, $r, $t, $u, $v, $z, $LBRACE, $BAR, $RBRACE, $NBSP, T_TokenMask, T_PrecedenceShift, T_Precedence, T_ClosingToken, T_AccessScopeTerminal, T_EndOfSource, T_Identifier, T_NumericLiteral, T_StringLiteral, T_IsBinaryOp, T_IsUnaryOp, T_FalseKeyword, T_TrueKeyword, T_NullKeyword, T_UndefinedKeyword, T_ThisScope, T_ParentScope, T_LeftParen, T_LeftBrace, T_Period, T_RightBrace, T_RightParen, T_Semicolon, T_Comma, T_LeftBracket, T_RightBracket, T_Colon, T_QuestionMark, T_SingleQuote, T_DoubleQuote, T_BindingBehavior, T_ValueConverter, T_LogicalOr, T_LogicalAnd, T_BitwiseXor, T_LooseEqual, T_LooseNotEqual, T_StrictEqual, T_StrictNotEqual, T_LessThan, T_GreaterThan, T_LessThanOrEqual, T_GreaterThanOrEqual, T_Add, T_Subtract, T_Multiply, T_Modulo, T_Divide, T_Assign, T_LogicalNot, KeywordLookup, TokenValues, mapProto, ModifyMapObserver, CapturedHandlerEntry, DelegateHandlerEntry, DelegationEntryHandler, EventHandler, DefaultEventStrategy, delegationStrategy, EventManager, EventSubscriber, DirtyChecker, DirtyCheckProperty, logger, propertyAccessor, PrimitiveObserver, SetterObserver, XLinkAttributeObserver, dataAttributeAccessor, DataAttributeObserver, StyleObserver, ValueAttributeObserver, checkedArrayContext, checkedValueContext, CheckedObserver, selectArrayContext, SelectValueObserver, ClassObserver, ComputedExpression, svgElements, svgPresentationElements, svgPresentationAttributes, svgAnalyzer, createElement, elements, presentationElements, presentationAttributes, SVGAnalyzer, ObserverLocator, ObjectObservationAdapter, BindingExpression, Binding, CallExpression, Call, ValueConverterResource, BindingBehaviorResource, ListenerExpression, Listener, NameExpression, NameBinder, LookupFunctions, BindingEngine, setProto, ModifySetObserver, signals;
+  var LogManager, PLATFORM, DOM, TaskQueue, metadata, _typeof, _dec, _dec2, _class, _dec3, _class2, _dec4, _class3, _dec5, _class5, _dec6, _class7, _dec7, _class8, _dec8, _class9, _dec9, _class10, _class12, _temp, _dec10, _class13, _class14, _temp2, targetContext, sourceContext, map, slotNames, versionSlotNames, i, queue, queued, nextId, minimumImmediate, frameBudget, isFlushRequested, immediate, arrayPool1, arrayPool2, poolUtilization, ExpressionObserver, EDIT_LEAVE, EDIT_UPDATE, EDIT_ADD, EDIT_DELETE, arraySplice, ModifyCollectionObserver, CollectionLengthObserver, pop, push, reverse, shift, sort, splice, unshift, ModifyArrayObserver, Expression, Chain, BindingBehavior, ValueConverter, Assign, Conditional, AccessThis, AccessScope, AccessMember, AccessKeyed, CallScope, CallMember, CallFunction, Binary, PrefixNot, LiteralPrimitive, LiteralString, LiteralArray, LiteralObject, _Unparser, ExpressionCloner, bindingMode, Parser, ParserImplementation, $EOF, $TAB, $LF, $VTAB, $FF, $CR, $SPACE, $BANG, $DQ, $$, $PERCENT, $AMPERSAND, $SQ, $LPAREN, $RPAREN, $STAR, $PLUS, $COMMA, $MINUS, $PERIOD, $SLASH, $COLON, $SEMICOLON, $LT, $EQ, $GT, $QUESTION, $0, $9, $A, $E, $Z, $LBRACKET, $BACKSLASH, $RBRACKET, $CARET, $_, $a, $e, $f, $n, $r, $t, $u, $v, $z, $LBRACE, $BAR, $RBRACE, $NBSP, T_TokenMask, T_PrecedenceShift, T_Precedence, T_ClosingToken, T_AccessScopeTerminal, T_EndOfSource, T_Identifier, T_NumericLiteral, T_StringLiteral, T_BinaryOperator, T_UnaryOperator, T_FalseKeyword, T_TrueKeyword, T_NullKeyword, T_UndefinedKeyword, T_ThisScope, T_ParentScope, T_LeftParen, T_LeftBrace, T_Period, T_RightBrace, T_RightParen, T_Semicolon, T_Comma, T_LeftBracket, T_RightBracket, T_Colon, T_QuestionMark, T_SingleQuote, T_DoubleQuote, T_BindingBehavior, T_ValueConverter, T_LogicalOr, T_LogicalAnd, T_BitwiseXor, T_LooseEqual, T_LooseNotEqual, T_StrictEqual, T_StrictNotEqual, T_LessThan, T_GreaterThan, T_LessThanOrEqual, T_GreaterThanOrEqual, T_Add, T_Subtract, T_Multiply, T_Modulo, T_Divide, T_Assign, T_LogicalNot, KeywordLookup, TokenValues, mapProto, ModifyMapObserver, CapturedHandlerEntry, DelegateHandlerEntry, DelegationEntryHandler, EventHandler, DefaultEventStrategy, delegationStrategy, EventManager, EventSubscriber, DirtyChecker, DirtyCheckProperty, logger, propertyAccessor, PrimitiveObserver, SetterObserver, XLinkAttributeObserver, dataAttributeAccessor, DataAttributeObserver, StyleObserver, ValueAttributeObserver, checkedArrayContext, checkedValueContext, CheckedObserver, selectArrayContext, SelectValueObserver, ClassObserver, ComputedExpression, svgElements, svgPresentationElements, svgPresentationAttributes, svgAnalyzer, createElement, elements, presentationElements, presentationAttributes, SVGAnalyzer, ObserverLocator, ObjectObservationAdapter, BindingExpression, Binding, CallExpression, Call, ValueConverterResource, BindingBehaviorResource, ListenerExpression, Listener, NameExpression, NameBinder, LookupFunctions, BindingEngine, setProto, ModifySetObserver, signals;
 
   function _possibleConstructorReturn(self, call) {
     if (!self) {
@@ -1622,7 +1622,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
       _export('ValueConverter', ValueConverter = function (_Expression3) {
         _inherits(ValueConverter, _Expression3);
 
-        function ValueConverter(expression, name, args, allArgs) {
+        function ValueConverter(expression, name, args) {
           
 
           var _this5 = _possibleConstructorReturn(this, _Expression3.call(this));
@@ -1630,7 +1630,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           _this5.expression = expression;
           _this5.name = name;
           _this5.args = args;
-          _this5.allArgs = allArgs;
+          _this5.allArgs = [expression].concat(args);
           return _this5;
         }
 
@@ -2712,7 +2712,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
               args.push(this.parseExpression());
             }
 
-            result = new ValueConverter(result, name, args, [result].concat(args));
+            result = new ValueConverter(result, name, args);
           }
 
           return result;
@@ -2761,11 +2761,11 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         ParserImplementation.prototype.parseBinary = function parseBinary(minPrecedence) {
           var left = this.parseUnary();
 
-          if ((this.token & T_IsBinaryOp) !== T_IsBinaryOp) {
+          if ((this.token & T_BinaryOperator) !== T_BinaryOperator) {
             return left;
           }
 
-          while ((this.token & T_IsBinaryOp) === T_IsBinaryOp) {
+          while ((this.token & T_BinaryOperator) === T_BinaryOperator) {
             var opToken = this.token;
             var precedence = opToken & T_Precedence;
             if (precedence < minPrecedence) {
@@ -2779,7 +2779,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
 
         ParserImplementation.prototype.parseUnary = function parseUnary() {
           var opToken = this.token;
-          if ((opToken & T_IsUnaryOp) === T_IsUnaryOp) {
+          if ((opToken & T_UnaryOperator) === T_UnaryOperator) {
             this.nextToken();
             switch (opToken) {
               case T_Add:
@@ -3191,7 +3191,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
               if (char === $u) {
                 var hex = this.input.slice(this.index + 1, this.index + 5);
 
-                if (!/[A-Z0-9]{4}/.test(hex)) {
+                if (!/[A-Z0-9]{4}/i.test(hex)) {
                   this.error('Invalid unicode escape [\\u' + hex + ']');
                 }
 
@@ -3310,15 +3310,15 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
       $NBSP = 160;
       T_TokenMask = (1 << 6) - 1;
       T_PrecedenceShift = 6;
-      T_Precedence = 7 << 6;
+      T_Precedence = 7 << T_PrecedenceShift;
       T_ClosingToken = 1 << 9;
       T_AccessScopeTerminal = 1 << 10;
       T_EndOfSource = 1 << 11 | T_AccessScopeTerminal;
       T_Identifier = 1 << 12;
       T_NumericLiteral = 1 << 13;
       T_StringLiteral = 1 << 14;
-      T_IsBinaryOp = 1 << 15;
-      T_IsUnaryOp = 1 << 16;
+      T_BinaryOperator = 1 << 15;
+      T_UnaryOperator = 1 << 16;
       T_FalseKeyword = 0;
       T_TrueKeyword = 1;
       T_NullKeyword = 2;
@@ -3340,24 +3340,24 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
       T_DoubleQuote = 18;
       T_BindingBehavior = 19 | T_AccessScopeTerminal;
       T_ValueConverter = 20 | T_AccessScopeTerminal;
-      T_LogicalOr = 21 | T_IsBinaryOp | 1 << T_PrecedenceShift;
-      T_LogicalAnd = 22 | T_IsBinaryOp | 2 << T_PrecedenceShift;
-      T_BitwiseXor = 23 | T_IsBinaryOp | 3 << T_PrecedenceShift;
-      T_LooseEqual = 24 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-      T_LooseNotEqual = 25 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-      T_StrictEqual = 26 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-      T_StrictNotEqual = 27 | T_IsBinaryOp | 4 << T_PrecedenceShift;
-      T_LessThan = 28 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-      T_GreaterThan = 29 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-      T_LessThanOrEqual = 30 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-      T_GreaterThanOrEqual = 31 | T_IsBinaryOp | 5 << T_PrecedenceShift;
-      T_Add = 32 | T_IsUnaryOp | T_IsBinaryOp | 6 << T_PrecedenceShift;
-      T_Subtract = 33 | T_IsUnaryOp | T_IsBinaryOp | 6 << T_PrecedenceShift;
-      T_Multiply = 34 | T_IsBinaryOp | 7 << T_PrecedenceShift;
-      T_Modulo = 35 | T_IsBinaryOp | 7 << T_PrecedenceShift;
-      T_Divide = 36 | T_IsBinaryOp | 7 << T_PrecedenceShift;
+      T_LogicalOr = 21 | T_BinaryOperator | 1 << T_PrecedenceShift;
+      T_LogicalAnd = 22 | T_BinaryOperator | 2 << T_PrecedenceShift;
+      T_BitwiseXor = 23 | T_BinaryOperator | 3 << T_PrecedenceShift;
+      T_LooseEqual = 24 | T_BinaryOperator | 4 << T_PrecedenceShift;
+      T_LooseNotEqual = 25 | T_BinaryOperator | 4 << T_PrecedenceShift;
+      T_StrictEqual = 26 | T_BinaryOperator | 4 << T_PrecedenceShift;
+      T_StrictNotEqual = 27 | T_BinaryOperator | 4 << T_PrecedenceShift;
+      T_LessThan = 28 | T_BinaryOperator | 5 << T_PrecedenceShift;
+      T_GreaterThan = 29 | T_BinaryOperator | 5 << T_PrecedenceShift;
+      T_LessThanOrEqual = 30 | T_BinaryOperator | 5 << T_PrecedenceShift;
+      T_GreaterThanOrEqual = 31 | T_BinaryOperator | 5 << T_PrecedenceShift;
+      T_Add = 32 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+      T_Subtract = 33 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+      T_Multiply = 34 | T_BinaryOperator | 7 << T_PrecedenceShift;
+      T_Modulo = 35 | T_BinaryOperator | 7 << T_PrecedenceShift;
+      T_Divide = 36 | T_BinaryOperator | 7 << T_PrecedenceShift;
       T_Assign = 37;
-      T_LogicalNot = 38 | T_IsUnaryOp;
+      T_LogicalNot = 38 | T_UnaryOperator;
       KeywordLookup = Object.create(null, {
         true: { value: T_TrueKeyword },
         null: { value: T_NullKeyword },
