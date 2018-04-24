@@ -3137,35 +3137,50 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         };
 
         ParserImplementation.prototype.scanNumber = function scanNumber(isFloat) {
-          var start = this.index;
-          this.index++;
+          var value = 0;
           var char = this.input.charCodeAt(this.index);
-          loop: while (true) {
-            switch (char) {
-              case $PERIOD:
-                isFloat = true;
-                break;
-              case $e:
-              case $E:
-                char = this.input.charCodeAt(++this.index);
-                if (char === $PLUS || char === $MINUS) {
-                  char = this.input.charCodeAt(++this.index);
-                }
-                if (char < $0 || char > $9) {
-                  this.error('Invalid exponent', -1);
-                }
-                isFloat = true;
-                break;
-              default:
-                if (char < $0 || char > $9 || this.index === this.length) {
-                  break loop;
-                }
+          if (!isFloat) {
+            while (isDigit(char)) {
+              value = value * 10 + (char - $0);
+              char = this.input.charCodeAt(++this.index);
             }
+          }
+          var start = this.index;
+
+          if (char === $PERIOD) {
+            isFloat = true;
+            do {
+              char = this.input.charCodeAt(++this.index);
+            } while (isDigit(char));
+          }
+
+          if (char === $e || char === $E) {
+            isFloat = true;
+
+            var startExp = this.index;
+            char = this.input.charCodeAt(++this.index);
+
+            if (char === $PLUS || char === $MINUS) {
+              char = this.input.charCodeAt(++this.index);
+            }
+
+            if (!isDigit(char)) {
+              this.index = startExp;
+              this.error('Invalid exponent');
+            }
+          }
+
+          if (!isFloat) {
+            this.tokenValue = value;
+            return T_NumericLiteral;
+          }
+
+          while (isDigit(char)) {
             char = this.input.charCodeAt(++this.index);
           }
 
-          var text = this.input.slice(start, this.index);
-          this.tokenValue = isFloat ? parseFloat(text) : parseInt(text, 10);
+          var text = value + this.input.slice(start, this.index);
+          this.tokenValue = parseFloat(text);
           return T_NumericLiteral;
         };
 
@@ -3189,14 +3204,22 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
               var _unescaped = void 0;
 
               if (char === $u) {
-                var hex = this.input.slice(this.index + 1, this.index + 5);
+                char = this.input.charCodeAt(++this.index);
+                var index = this.index;
 
-                if (!/[A-Z0-9]{4}/i.test(hex)) {
-                  this.error('Invalid unicode escape [\\u' + hex + ']');
+                if (index + 4 < this.length) {
+                  var hex = this.input.slice(index, index + 4);
+
+                  if (!/[A-Z0-9]{4}/i.test(hex)) {
+                    this.error('Invalid unicode escape [\\u' + hex + ']');
+                  }
+
+                  _unescaped = parseInt(hex, 16);
+                  this.index += 4;
+                } else {
+                  var expression = this.input.slice(this.lastIndex, this.index);
+                  this.error('Unexpected token ' + expression);
                 }
-
-                _unescaped = parseInt(hex, 16);
-                this.index += 5;
               } else {
                 _unescaped = unescape(this.input.charCodeAt(this.index));
                 this.index++;
@@ -3230,10 +3253,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         };
 
         ParserImplementation.prototype.error = function error(message) {
-          var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-
-          var position = this.index + offset;
-          throw new Error('Lexer Error: ' + message + ' at column ' + position + ' in expression [' + this.input + ']');
+          throw new Error('Lexer Error: ' + message + ' at column ' + this.index + ' in expression [' + this.input + ']');
         };
 
         ParserImplementation.prototype.optional = function optional(type) {

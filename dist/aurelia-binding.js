@@ -2699,37 +2699,54 @@ export class ParserImplementation {
   }
 
   scanNumber(isFloat) {
-    let start = this.index;
-    this.index++;
+    let value = 0;
     let char = this.input.charCodeAt(this.index);
-    loop: while (true) {
-      switch(char) {
-        case $PERIOD:
-          // todo(fkleuver): Should deal with spread operator elsewhere,
-          // and throw here when seeing more than one period
-          isFloat = true;
-          break;
-        case $e:
-        case $E:
-          char = this.input.charCodeAt(++this.index);
-          if (char === $PLUS || char === $MINUS) {
-            char = this.input.charCodeAt(++this.index);
-          }
-          if (char < $0 || char > $9) {
-            this.error('Invalid exponent', -1);
-          }
-          isFloat = true;
-          break;
-        default:
-          if (char < $0 || char > $9 || this.index === this.length) {
-            break loop;
-          }
+    if (!isFloat) {
+      // this is significantly faster than parseInt, however that
+      // gain is lost when the number turns out to be a float
+      while (isDigit(char)) {
+        value = value * 10 + (char - $0);
+        char = this.input.charCodeAt(++this.index)
       }
-      char = this.input.charCodeAt(++this.index);
+    }
+    const start = this.index;
+
+    if (char === $PERIOD) {
+      isFloat = true;
+      do {
+        char = this.input.charCodeAt(++this.index)
+      } while (isDigit(char))
     }
 
-    const text = this.input.slice(start, this.index);
-    this.tokenValue = isFloat ? parseFloat(text) : parseInt(text, 10);
+    if (char === $e || char === $E) {
+      isFloat = true;
+      // for error reporting in case the exponent is invalid
+      const startExp = this.index;
+      char = this.input.charCodeAt(++this.index);
+
+      if (char === $PLUS || char === $MINUS) {
+        char = this.input.charCodeAt(++this.index);
+      }
+
+      if (!isDigit(char)) {
+        this.index = startExp;
+        this.error('Invalid exponent');
+      }
+    }
+
+    // we got nothing after the initial number scan, so just use 
+    // the calculated integer
+    if (!isFloat) {
+      this.tokenValue = value;
+      return T_NumericLiteral;
+    }
+
+    while (isDigit(char)) {
+      char = this.input.charCodeAt(++this.index)
+    }
+
+    const text = value + this.input.slice(start, this.index);
+    this.tokenValue = parseFloat(text);
     return T_NumericLiteral;
   }
 
@@ -2748,21 +2765,27 @@ export class ParserImplementation {
         }
 
         buffer.push(this.input.slice(marker, this.index));
-        char = this.input.charCodeAt(++this.index)
+        char = this.input.charCodeAt(++this.index);
 
         let unescaped;
 
         if (char === $u) {
-          // todo(kasperl): Check bounds? Make sure we have test
-          // coverage for this.
-          let hex = this.input.slice(this.index + 1, this.index + 5);
+          char = this.input.charCodeAt(++this.index);
+          const index = this.index;
 
-          if (!/[A-Z0-9]{4}/i.test(hex)) {
-            this.error(`Invalid unicode escape [\\u${hex}]`);
+          if (index + 4 < this.length) {
+            let hex = this.input.slice(index, index + 4);
+  
+            if (!/[A-Z0-9]{4}/i.test(hex)) {
+              this.error(`Invalid unicode escape [\\u${hex}]`);
+            }
+  
+            unescaped = parseInt(hex, 16);
+            this.index += 4;
+          } else {
+            const expression = this.input.slice(this.lastIndex, this.index);
+            this.error(`Unexpected token ${expression}`);
           }
-
-          unescaped = parseInt(hex, 16);
-          this.index += 5;
         } else {
           unescaped = unescape(this.input.charCodeAt(this.index));
           this.index++;
@@ -2796,11 +2819,8 @@ export class ParserImplementation {
     return T_StringLiteral;
   }
 
-  error(message, offset = 0) {
-    // todo(kasperl): Try to get rid of the offset. It is only used to match
-    // the error expectations in the lexer tests for numbers with exponents.
-    let position = this.index + offset;
-    throw new Error(`Lexer Error: ${message} at column ${position} in expression [${this.input}]`);
+  error(message) {
+    throw new Error(`Lexer Error: ${message} at column ${this.index} in expression [${this.input}]`);
   }
 
   optional(type) {
@@ -2953,6 +2973,8 @@ const T_UnaryOperator       = 1 << 16;
 /** '?' */const T_QuestionMark = 16;
 /** ''' */const T_SingleQuote  = 17;
 /** '"' */const T_DoubleQuote  = 18;
+
+// Operator precedence: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#Table
 
 /** '&' */  const T_BindingBehavior    = 19 | T_AccessScopeTerminal;
 /** '|' */  const T_ValueConverter     = 20 | T_AccessScopeTerminal;
