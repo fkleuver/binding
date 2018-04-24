@@ -3,11 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getSetObserver = exports.BindingEngine = exports.NameExpression = exports.Listener = exports.ListenerExpression = exports.BindingBehaviorResource = exports.ValueConverterResource = exports.Call = exports.CallExpression = exports.Binding = exports.BindingExpression = exports.ObjectObservationAdapter = exports.ObserverLocator = exports.SVGAnalyzer = exports.presentationAttributes = exports.presentationElements = exports.elements = exports.ComputedExpression = exports.ClassObserver = exports.SelectValueObserver = exports.CheckedObserver = exports.ValueAttributeObserver = exports.StyleObserver = exports.DataAttributeObserver = exports.dataAttributeAccessor = exports.XLinkAttributeObserver = exports.SetterObserver = exports.PrimitiveObserver = exports.propertyAccessor = exports.DirtyCheckProperty = exports.DirtyChecker = exports.EventSubscriber = exports.EventManager = exports.delegationStrategy = exports.getMapObserver = exports.ParserImplementation = exports.Parser = exports.Scanner = exports.Lexer = exports.Token = exports.bindingMode = exports.ExpressionCloner = exports.Unparser = exports.LiteralObject = exports.LiteralArray = exports.LiteralString = exports.LiteralPrimitive = exports.PrefixNot = exports.Binary = exports.CallFunction = exports.CallMember = exports.CallScope = exports.AccessKeyed = exports.AccessMember = exports.AccessScope = exports.AccessThis = exports.Conditional = exports.Assign = exports.ValueConverter = exports.BindingBehavior = exports.Chain = exports.Expression = exports.getArrayObserver = exports.CollectionLengthObserver = exports.ModifyCollectionObserver = exports.ExpressionObserver = exports.sourceContext = exports.targetContext = undefined;
+exports.getSetObserver = exports.BindingEngine = exports.NameExpression = exports.Listener = exports.ListenerExpression = exports.BindingBehaviorResource = exports.ValueConverterResource = exports.Call = exports.CallExpression = exports.Binding = exports.BindingExpression = exports.ObjectObservationAdapter = exports.ObserverLocator = exports.SVGAnalyzer = exports.presentationAttributes = exports.presentationElements = exports.elements = exports.ComputedExpression = exports.ClassObserver = exports.SelectValueObserver = exports.CheckedObserver = exports.ValueAttributeObserver = exports.StyleObserver = exports.DataAttributeObserver = exports.dataAttributeAccessor = exports.XLinkAttributeObserver = exports.SetterObserver = exports.PrimitiveObserver = exports.propertyAccessor = exports.DirtyCheckProperty = exports.DirtyChecker = exports.EventSubscriber = exports.EventManager = exports.delegationStrategy = exports.getMapObserver = exports.ParserImplementation = exports.Parser = exports.bindingMode = exports.ExpressionCloner = exports.Unparser = exports.LiteralObject = exports.LiteralArray = exports.LiteralString = exports.LiteralPrimitive = exports.PrefixNot = exports.Binary = exports.CallFunction = exports.CallMember = exports.CallScope = exports.AccessKeyed = exports.AccessMember = exports.AccessScope = exports.AccessThis = exports.Conditional = exports.Assign = exports.ValueConverter = exports.BindingBehavior = exports.Chain = exports.Expression = exports.getArrayObserver = exports.CollectionLengthObserver = exports.ModifyCollectionObserver = exports.ExpressionObserver = exports.sourceContext = exports.targetContext = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _dec, _dec2, _class, _dec3, _class2, _dec4, _class3, _dec5, _class5, _dec6, _class7, _dec7, _class8, _dec8, _class9, _dec9, _class10, _class12, _temp, _dec10, _class13, _class14, _temp2;
 
@@ -2282,277 +2280,603 @@ var bindingMode = exports.bindingMode = {
   fromView: 3
 };
 
-var Token = exports.Token = function () {
-  function Token(index, text) {
+var Parser = exports.Parser = function () {
+  function Parser() {
     
 
-    this.index = index;
-    this.text = text;
+    this.cache = Object.create(null);
   }
 
-  Token.prototype.withOp = function withOp(op) {
-    this.opKey = op;
-    return this;
+  Parser.prototype.parse = function parse(input) {
+    input = input || '';
+
+    return this.cache[input] || (this.cache[input] = new ParserImplementation(input).parseChain());
   };
 
-  Token.prototype.withGetterSetter = function withGetterSetter(key) {
-    this.key = key;
-    return this;
-  };
-
-  Token.prototype.withValue = function withValue(value) {
-    this.value = value;
-    return this;
-  };
-
-  Token.prototype.toString = function toString() {
-    return 'Token(' + this.text + ')';
-  };
-
-  return Token;
+  return Parser;
 }();
 
-var Lexer = exports.Lexer = function () {
-  function Lexer() {
-    
-  }
-
-  Lexer.prototype.lex = function lex(text) {
-    var scanner = new Scanner(text);
-    var tokens = [];
-    var token = scanner.scanToken();
-
-    while (token) {
-      tokens.push(token);
-      token = scanner.scanToken();
-    }
-
-    return tokens;
-  };
-
-  return Lexer;
-}();
-
-var Scanner = exports.Scanner = function () {
-  function Scanner(input) {
+var ParserImplementation = exports.ParserImplementation = function () {
+  function ParserImplementation(input) {
     
 
+    this.index = 0;
+    this.startIndex = 0;
+    this.lastIndex = 0;
     this.input = input;
     this.length = input.length;
-    this.peek = 0;
-    this.index = -1;
-
-    this.advance();
+    this.token = T_EndOfSource;
+    this.tokenValue = undefined;
+    this.tokenRaw = '';
+    this.lastValue = 0;
   }
 
-  Scanner.prototype.scanToken = function scanToken() {
-    while (this.peek <= $SPACE) {
-      if (++this.index >= this.length) {
-        this.peek = $EOF;
-        return null;
+  ParserImplementation.prototype.parseChain = function parseChain() {
+    this.nextToken();
+
+    var isChain = false;
+    var expressions = [];
+
+    while (this.token !== T_EndOfSource) {
+      while (this.optional(T_Semicolon)) {
+        isChain = true;
       }
 
-      this.peek = this.input.charCodeAt(this.index);
+      if ((this.token & T_ClosingToken) === T_ClosingToken) {
+        this.error('Unconsumed token ' + String.fromCharCode(this.tokenValue));
+      }
+
+      var expr = this.parseBindingBehavior();
+      expressions.push(expr);
+
+      while (this.optional(T_Semicolon)) {
+        isChain = true;
+      }
+
+      if (isChain) {
+        this.error('Multiple expressions are not allowed.');
+      }
     }
 
-    if (isIdentifierStart(this.peek)) {
-      return this.scanIdentifier();
-    }
-
-    if (isDigit(this.peek)) {
-      return this.scanNumber(this.index);
-    }
-
-    var start = this.index;
-
-    switch (this.peek) {
-      case $PERIOD:
-        this.advance();
-        return isDigit(this.peek) ? this.scanNumber(start) : new Token(start, '.');
-      case $LPAREN:
-      case $RPAREN:
-      case $LBRACE:
-      case $RBRACE:
-      case $LBRACKET:
-      case $RBRACKET:
-      case $COMMA:
-      case $COLON:
-      case $SEMICOLON:
-        return this.scanCharacter(start, String.fromCharCode(this.peek));
-      case $SQ:
-      case $DQ:
-        return this.scanString();
-      case $PLUS:
-      case $MINUS:
-      case $STAR:
-      case $SLASH:
-      case $PERCENT:
-      case $CARET:
-      case $QUESTION:
-        return this.scanOperator(start, String.fromCharCode(this.peek));
-      case $LT:
-      case $GT:
-      case $BANG:
-      case $EQ:
-        return this.scanComplexOperator(start, $EQ, String.fromCharCode(this.peek), '=');
-      case $AMPERSAND:
-        return this.scanComplexOperator(start, $AMPERSAND, '&', '&');
-      case $BAR:
-        return this.scanComplexOperator(start, $BAR, '|', '|');
-      case $NBSP:
-        while (isWhitespace(this.peek)) {
-          this.advance();
-        }
-
-        return this.scanToken();
-    }
-
-    var character = String.fromCharCode(this.peek);
-    this.error('Unexpected character [' + character + ']');
-    return null;
+    return expressions.length === 1 ? expressions[0] : new Chain(expressions);
   };
 
-  Scanner.prototype.scanCharacter = function scanCharacter(start, text) {
-    assert(this.peek === text.charCodeAt(0));
-    this.advance();
-    return new Token(start, text);
-  };
+  ParserImplementation.prototype.parseBindingBehavior = function parseBindingBehavior() {
+    var result = this.parseValueConverter();
 
-  Scanner.prototype.scanOperator = function scanOperator(start, text) {
-    assert(this.peek === text.charCodeAt(0));
-    assert(OPERATORS[text] === 1);
-    this.advance();
-    return new Token(start, text).withOp(text);
-  };
+    while (this.optional(T_BindingBehavior)) {
+      var name = this.tokenValue;
+      var args = [];
 
-  Scanner.prototype.scanComplexOperator = function scanComplexOperator(start, code, one, two) {
-    assert(this.peek === one.charCodeAt(0));
-    this.advance();
+      this.nextToken();
 
-    var text = one;
+      while (this.optional(T_Colon)) {
+        args.push(this.parseExpression());
+      }
 
-    if (this.peek === code) {
-      this.advance();
-      text += two;
-    }
-
-    if (this.peek === code) {
-      this.advance();
-      text += two;
-    }
-
-    assert(OPERATORS[text] === 1);
-
-    return new Token(start, text).withOp(text);
-  };
-
-  Scanner.prototype.scanIdentifier = function scanIdentifier() {
-    assert(isIdentifierStart(this.peek));
-    var start = this.index;
-
-    this.advance();
-
-    while (isIdentifierPart(this.peek)) {
-      this.advance();
-    }
-
-    var text = this.input.substring(start, this.index);
-    var result = new Token(start, text);
-
-    if (OPERATORS[text] === 1) {
-      result.withOp(text);
-    } else {
-      result.withGetterSetter(text);
+      result = new BindingBehavior(result, name, args);
     }
 
     return result;
   };
 
-  Scanner.prototype.scanNumber = function scanNumber(start) {
-    assert(isDigit(this.peek));
-    var simple = this.index === start;
-    this.advance();
+  ParserImplementation.prototype.parseValueConverter = function parseValueConverter() {
+    var result = this.parseExpression();
 
-    while (true) {
-      if (!isDigit(this.peek)) {
-        if (this.peek === $PERIOD) {
-          simple = false;
-        } else if (isExponentStart(this.peek)) {
-          this.advance();
+    while (this.optional(T_ValueConverter)) {
+      var name = this.tokenValue;
+      var args = [];
 
-          if (isExponentSign(this.peek)) {
-            this.advance();
-          }
+      this.nextToken();
 
-          if (!isDigit(this.peek)) {
-            this.error('Invalid exponent', -1);
-          }
-
-          simple = false;
-        } else {
-          break;
-        }
+      while (this.optional(T_Colon)) {
+        args.push(this.parseExpression());
       }
 
-      this.advance();
+      result = new ValueConverter(result, name, args, [result].concat(args));
     }
 
-    var text = this.input.substring(start, this.index);
-    var value = simple ? parseInt(text, 10) : parseFloat(text);
-    return new Token(start, text).withValue(value);
+    return result;
   };
 
-  Scanner.prototype.scanString = function scanString() {
-    assert(this.peek === $SQ || this.peek === $DQ);
-
+  ParserImplementation.prototype.parseExpression = function parseExpression() {
     var start = this.index;
-    var quote = this.peek;
+    var result = this.parseConditional();
 
-    this.advance();
+    while (this.token === T_Assign) {
+      if (!result.isAssignable) {
+        var end = this.index < this.length ? this.index : this.length;
+        var expression = this.input.slice(start, end);
+
+        this.error('Expression ' + expression + ' is not assignable');
+      }
+
+      this.expect(T_Assign);
+      result = new Assign(result, this.parseConditional());
+    }
+
+    return result;
+  };
+
+  ParserImplementation.prototype.parseConditional = function parseConditional() {
+    var start = this.index;
+    var result = this.parseBinary(0);
+
+    if (this.optional(T_QuestionMark)) {
+      var yes = this.parseExpression();
+
+      if (!this.optional(T_Colon)) {
+        var end = this.index < this.length ? this.index : this.length;
+        var expression = this.input.slice(start, end);
+
+        this.error('Conditional expression ' + expression + ' requires all 3 expressions');
+      }
+
+      var no = this.parseExpression();
+      result = new Conditional(result, yes, no);
+    }
+
+    return result;
+  };
+
+  ParserImplementation.prototype.parseBinary = function parseBinary(minPrecedence) {
+    var left = this.parseUnary();
+
+    if ((this.token & T_IsBinaryOp) !== T_IsBinaryOp) {
+      return left;
+    }
+
+    while ((this.token & T_IsBinaryOp) === T_IsBinaryOp) {
+      var opToken = this.token;
+      var precedence = opToken & T_Precedence;
+      if (precedence < minPrecedence) {
+        break;
+      }
+      this.nextToken();
+      left = new Binary(TokenValues[opToken & T_TokenMask], left, this.parseBinary(precedence));
+    }
+    return left;
+  };
+
+  ParserImplementation.prototype.parseUnary = function parseUnary() {
+    var opToken = this.token;
+    if ((opToken & T_IsUnaryOp) === T_IsUnaryOp) {
+      this.nextToken();
+      switch (opToken) {
+        case T_Add:
+          return this.parseUnary();
+        case T_Subtract:
+          return new Binary('-', new LiteralPrimitive(0), this.parseUnary());
+        case T_LogicalNot:
+          return new PrefixNot('!', this.parseUnary());
+      }
+    }
+    return this.parseAccessOrCallMember();
+  };
+
+  ParserImplementation.prototype.parseAccessOrCallMember = function parseAccessOrCallMember() {
+    var result = this.parsePrimary();
+
+    while (true) {
+      if (this.optional(T_Period)) {
+        var name = this.tokenValue;
+
+        this.nextToken();
+
+        if (this.optional(T_LeftParen)) {
+          var args = this.parseExpressionList(T_RightParen);
+          this.expect(T_RightParen);
+          if (result instanceof AccessThis) {
+            result = new CallScope(name, args, result.ancestor);
+          } else {
+            result = new CallMember(result, name, args);
+          }
+        } else {
+          if (result instanceof AccessThis) {
+            result = new AccessScope(name, result.ancestor);
+          } else {
+            result = new AccessMember(result, name);
+          }
+        }
+      } else if (this.optional(T_LeftBracket)) {
+        var key = this.parseExpression();
+        this.expect(T_RightBracket);
+        result = new AccessKeyed(result, key);
+      } else if (this.optional(T_LeftParen)) {
+        var _args = this.parseExpressionList(T_RightParen);
+        this.expect(T_RightParen);
+        result = new CallFunction(result, _args);
+      } else {
+        return result;
+      }
+    }
+  };
+
+  ParserImplementation.prototype.parsePrimary = function parsePrimary() {
+    var token = this.token;
+    switch (token) {
+      case T_Identifier:
+      case T_ParentScope:
+        return this.parseAccessOrCallScope();
+      case T_ThisScope:
+        this.nextToken();
+        return new AccessThis(0);
+      case T_LeftParen:
+        this.nextToken();
+        var result = this.parseExpression();
+        this.expect(T_RightParen);
+        return result;
+      case T_LeftBracket:
+        this.nextToken();
+        var _elements = this.parseExpressionList(T_RightBracket);
+        this.expect(T_RightBracket);
+        return new LiteralArray(_elements);
+      case T_LeftBrace:
+        return this.parseObject();
+      case T_StringLiteral:
+        {
+          var value = this.tokenValue;
+          this.nextToken();
+          return new LiteralString(value);
+        }
+      case T_NumericLiteral:
+        {
+          var _value = this.tokenValue;
+          this.nextToken();
+          return new LiteralPrimitive(_value);
+        }
+      case T_NullKeyword:
+      case T_UndefinedKeyword:
+      case T_TrueKeyword:
+      case T_FalseKeyword:
+        this.nextToken();
+        return new LiteralPrimitive(TokenValues[token & T_TokenMask]);
+      default:
+        if (this.index >= this.length) {
+          throw new Error('Unexpected end of expression at column ' + this.index + ' of ' + this.input);
+        } else {
+          var expression = this.input.slice(this.lastIndex, this.index);
+          this.error('Unexpected token ' + expression);
+        }
+    }
+  };
+
+  ParserImplementation.prototype.parseAccessOrCallScope = function parseAccessOrCallScope() {
+    var name = this.tokenValue;
+    var token = this.token;
+
+    this.nextToken();
+
+    var ancestor = 0;
+    while (token === T_ParentScope) {
+      ancestor++;
+      if (this.optional(T_Period)) {
+        name = this.tokenValue;
+        token = this.token;
+        this.nextToken();
+      } else if ((this.token & T_AccessScopeTerminal) === T_AccessScopeTerminal) {
+        return new AccessThis(ancestor);
+      } else {
+        var expression = this.input.slice(this.lastIndex, this.index);
+        this.error('Unexpected token ' + expression);
+      }
+    }
+
+    if (this.optional(T_LeftParen)) {
+      var args = this.parseExpressionList(T_RightParen);
+      this.expect(T_RightParen);
+      return new CallScope(name, args, ancestor);
+    }
+
+    return new AccessScope(name, ancestor);
+  };
+
+  ParserImplementation.prototype.parseObject = function parseObject() {
+    var keys = [];
+    var values = [];
+
+    this.expect(T_LeftBrace);
+
+    if (this.token ^ T_RightBrace) {
+      do {
+
+        var token = this.token;
+        keys.push(this.tokenValue);
+
+        this.nextToken();
+        if (token === T_Identifier && (this.token === T_Comma || this.token === T_RightBrace)) {
+          --this.index;
+          values.push(this.parseAccessOrCallScope());
+        } else {
+          this.expect(T_Colon);
+          values.push(this.parseExpression());
+        }
+      } while (this.optional(T_Comma));
+    }
+
+    this.expect(T_RightBrace);
+
+    return new LiteralObject(keys, values);
+  };
+
+  ParserImplementation.prototype.parseExpressionList = function parseExpressionList(terminator) {
+    var result = [];
+
+    if (this.token ^ terminator) {
+      do {
+        result.push(this.parseExpression());
+      } while (this.optional(T_Comma));
+    }
+
+    return result;
+  };
+
+  ParserImplementation.prototype.nextToken = function nextToken() {
+    this.lastIndex = this.index;
+
+    return this.token = this.scanToken();
+  };
+
+  ParserImplementation.prototype.scanToken = function scanToken() {
+    while (this.index < this.length) {
+      this.startIndex = this.index;
+      var current = this.input.charCodeAt(this.index);
+
+      if (current <= $SPACE) {
+        this.index++;
+        continue;
+      }
+
+      if (isIdentifierStart(current)) {
+        return this.scanIdentifier();
+      }
+
+      if (isDigit(current)) {
+        return this.scanNumber(false);
+      }
+
+      var start = this.index;
+
+      switch (current) {
+        case $PERIOD:
+          {
+            if (this.index < this.length) {
+              var next = this.input.charCodeAt(this.index + 1);
+              if (next >= $0 && next <= $9) {
+                return this.scanNumber(true);
+              }
+              this.index++;
+            }
+            return T_Period;
+          }
+        case $LPAREN:
+          this.index++;
+          return T_LeftParen;
+        case $RPAREN:
+          this.index++;
+          return T_RightParen;
+        case $LBRACE:
+          this.index++;
+          return T_LeftBrace;
+        case $RBRACE:
+          this.index++;
+          return T_RightBrace;
+        case $LBRACKET:
+          this.index++;
+          return T_LeftBracket;
+        case $RBRACKET:
+          this.index++;
+          return T_RightBracket;
+        case $COMMA:
+          this.index++;
+          return T_Comma;
+        case $COLON:
+          this.index++;
+          return T_Colon;
+        case $SEMICOLON:
+          this.index++;
+          return T_Semicolon;
+        case $SQ:
+        case $DQ:
+          return this.scanString();
+        case $PLUS:
+          this.index++;
+          return T_Add;
+        case $MINUS:
+          this.index++;
+          return T_Subtract;
+        case $STAR:
+          this.index++;
+          return T_Multiply;
+        case $SLASH:
+          this.index++;
+          return T_Divide;
+        case $PERCENT:
+          this.index++;
+          return T_Modulo;
+        case $CARET:
+          this.index++;
+          return T_BitwiseXor;
+        case $QUESTION:
+          this.index++;
+          return T_QuestionMark;
+        case $LT:
+          {
+            var _next = this.input.charCodeAt(++this.index);
+            if (_next === $EQ) {
+              this.index++;
+              return T_LessThanOrEqual;
+            }
+            return T_LessThan;
+          }
+        case $GT:
+          {
+            var _next2 = this.input.charCodeAt(++this.index);
+            if (_next2 === $EQ) {
+              this.index++;
+              return T_GreaterThanOrEqual;
+            }
+            return T_GreaterThan;
+          }
+        case $BANG:
+          {
+            var _next3 = this.input.charCodeAt(++this.index);
+            if (_next3 === $EQ) {
+              var _next4 = this.input.charCodeAt(++this.index);
+              if (_next4 === $EQ) {
+                this.index++;
+                return T_StrictNotEqual;
+              }
+              return T_LooseNotEqual;
+            }
+            return T_LogicalNot;
+          }
+        case $EQ:
+          {
+            var _next5 = this.input.charCodeAt(++this.index);
+            if (_next5 === $EQ) {
+              var _next6 = this.input.charCodeAt(++this.index);
+              if (_next6 === $EQ) {
+                this.index++;
+                return T_StrictEqual;
+              }
+              return T_LooseEqual;
+            }
+            return T_Assign;
+          }
+        case $AMPERSAND:
+          {
+            var _next7 = this.input.charCodeAt(++this.index);
+            if (_next7 === $AMPERSAND) {
+              this.index++;
+              return T_LogicalAnd;
+            }
+            return T_BindingBehavior;
+          }
+        case $BAR:
+          {
+            var _next8 = this.input.charCodeAt(++this.index);
+            if (_next8 === $BAR) {
+              this.index++;
+              return T_LogicalOr;
+            }
+            return T_ValueConverter;
+          }
+        case $NBSP:
+          this.index++;
+          continue;
+      }
+
+      var character = String.fromCharCode(this.input.charCodeAt(this.index));
+      this.error('Unexpected character [' + character + ']');
+      return null;
+    }
+
+    return T_EndOfSource;
+  };
+
+  ParserImplementation.prototype.scanIdentifier = function scanIdentifier() {
+    var start = this.index;
+    var char = this.input.charCodeAt(++this.index);
+
+    while (isIdentifierPart(char)) {
+      char = this.input.charCodeAt(++this.index);
+    }
+
+    var text = this.input.slice(start, this.index);
+    this.tokenValue = text;
+
+    var len = text.length;
+    if (len >= 4 && len <= 9) {
+      var token = KeywordLookup[text];
+      if (token !== undefined) {
+        return token;
+      }
+    }
+
+    return T_Identifier;
+  };
+
+  ParserImplementation.prototype.scanNumber = function scanNumber(isFloat) {
+    var start = this.index;
+    this.index++;
+    var char = this.input.charCodeAt(this.index);
+    loop: while (true) {
+      switch (char) {
+        case $PERIOD:
+          isFloat = true;
+          break;
+        case $e:
+        case $E:
+          char = this.input.charCodeAt(++this.index);
+          if (char === $PLUS || char === $MINUS) {
+            char = this.input.charCodeAt(++this.index);
+          }
+          if (char < $0 || char > $9) {
+            this.error('Invalid exponent', -1);
+          }
+          isFloat = true;
+          break;
+        default:
+          if (char < $0 || char > $9 || this.index === this.length) {
+            break loop;
+          }
+      }
+      char = this.input.charCodeAt(++this.index);
+    }
+
+    var text = this.input.slice(start, this.index);
+    this.tokenValue = isFloat ? parseFloat(text) : parseInt(text, 10);
+    return T_NumericLiteral;
+  };
+
+  ParserImplementation.prototype.scanString = function scanString() {
+    var start = this.index;
+    var quote = this.input.charCodeAt(this.index++);
 
     var buffer = void 0;
     var marker = this.index;
+    var char = this.input.charCodeAt(this.index);
 
-    while (this.peek !== quote) {
-      if (this.peek === $BACKSLASH) {
+    while (char !== quote) {
+      if (char === $BACKSLASH) {
         if (!buffer) {
           buffer = [];
         }
 
-        buffer.push(this.input.substring(marker, this.index));
-        this.advance();
+        buffer.push(this.input.slice(marker, this.index));
+        char = this.input.charCodeAt(++this.index);
 
         var _unescaped = void 0;
 
-        if (this.peek === $u) {
-          var hex = this.input.substring(this.index + 1, this.index + 5);
+        if (char === $u) {
+          var hex = this.input.slice(this.index + 1, this.index + 5);
 
           if (!/[A-Z0-9]{4}/.test(hex)) {
             this.error('Invalid unicode escape [\\u' + hex + ']');
           }
 
           _unescaped = parseInt(hex, 16);
-
-          for (var _i21 = 0; _i21 < 5; ++_i21) {
-            this.advance();
-          }
+          this.index += 5;
         } else {
-          _unescaped = unescape(this.peek);
-          this.advance();
+          _unescaped = unescape(this.input.charCodeAt(this.index));
+          this.index++;
         }
 
         buffer.push(String.fromCharCode(_unescaped));
         marker = this.index;
-      } else if (this.peek === $EOF) {
+      } else if (char === $EOF) {
         this.error('Unterminated quote');
       } else {
-        this.advance();
+        this.index++;
       }
+
+      char = this.input.charCodeAt(this.index);
     }
 
-    var last = this.input.substring(marker, this.index);
-    this.advance();
-    var text = this.input.substring(start, this.index);
+    var last = this.input.slice(marker, this.index);
+    this.index++;
+    var text = this.input.slice(start, this.index);
 
     var unescaped = last;
 
@@ -2561,54 +2885,37 @@ var Scanner = exports.Scanner = function () {
       unescaped = buffer.join('');
     }
 
-    return new Token(start, text).withValue(unescaped);
+    this.tokenValue = unescaped;
+    this.tokenRaw = text;
+    return T_StringLiteral;
   };
 
-  Scanner.prototype.advance = function advance() {
-    if (++this.index >= this.length) {
-      this.peek = $EOF;
-    } else {
-      this.peek = this.input.charCodeAt(this.index);
-    }
-  };
-
-  Scanner.prototype.error = function error(message) {
+  ParserImplementation.prototype.error = function error(message) {
     var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
     var position = this.index + offset;
     throw new Error('Lexer Error: ' + message + ' at column ' + position + ' in expression [' + this.input + ']');
   };
 
-  return Scanner;
-}();
+  ParserImplementation.prototype.optional = function optional(type) {
+    if (this.token === type) {
+      this.nextToken();
+      return true;
+    }
 
-var OPERATORS = {
-  'undefined': 1,
-  'null': 1,
-  'true': 1,
-  'false': 1,
-  '+': 1,
-  '-': 1,
-  '*': 1,
-  '/': 1,
-  '%': 1,
-  '^': 1,
-  '=': 1,
-  '==': 1,
-  '===': 1,
-  '!=': 1,
-  '!==': 1,
-  '<': 1,
-  '>': 1,
-  '<=': 1,
-  '>=': 1,
-  '&&': 1,
-  '||': 1,
-  '&': 1,
-  '|': 1,
-  '!': 1,
-  '?': 1
-};
+    return false;
+  };
+
+  ParserImplementation.prototype.expect = function expect(type) {
+    if (this.token === type) {
+      this.nextToken();
+    } else {
+      this.error('Missing expected token type ' + type);
+    }
+  };
+
+  return ParserImplementation;
+}();
 
 var $EOF = 0;
 var $TAB = 9;
@@ -2666,10 +2973,6 @@ var $BAR = 124;
 var $RBRACE = 125;
 var $NBSP = 160;
 
-function isWhitespace(code) {
-  return code >= $TAB && code <= $SPACE || code === $NBSP;
-}
-
 function isIdentifierStart(code) {
   return $a <= code && code <= $z || $A <= code && code <= $Z || code === $_ || code === $$;
 }
@@ -2680,14 +2983,6 @@ function isIdentifierPart(code) {
 
 function isDigit(code) {
   return $0 <= code && code <= $9;
-}
-
-function isExponentStart(code) {
-  return code === $e || code === $E;
-}
-
-function isExponentSign(code) {
-  return code === $MINUS || code === $PLUS;
 }
 
 function unescape(code) {
@@ -2707,421 +3002,74 @@ function unescape(code) {
   }
 }
 
-function assert(condition, message) {
-  if (!condition) {
-    throw message || 'Assertion failed';
-  }
-}
-
-var EOF = new Token(-1, null);
-
-var Parser = exports.Parser = function () {
-  function Parser() {
-    
-
-    this.cache = {};
-    this.lexer = new Lexer();
-  }
-
-  Parser.prototype.parse = function parse(input) {
-    input = input || '';
-
-    return this.cache[input] || (this.cache[input] = new ParserImplementation(this.lexer, input).parseChain());
-  };
-
-  return Parser;
-}();
-
-var ParserImplementation = exports.ParserImplementation = function () {
-  function ParserImplementation(lexer, input) {
-    
-
-    this.index = 0;
-    this.input = input;
-    this.tokens = lexer.lex(input);
-  }
-
-  ParserImplementation.prototype.parseChain = function parseChain() {
-    var isChain = false;
-    var expressions = [];
-
-    while (this.optional(';')) {
-      isChain = true;
-    }
-
-    while (this.index < this.tokens.length) {
-      if (this.peek.text === ')' || this.peek.text === '}' || this.peek.text === ']') {
-        this.error('Unconsumed token ' + this.peek.text);
-      }
-
-      var expr = this.parseBindingBehavior();
-      expressions.push(expr);
-
-      while (this.optional(';')) {
-        isChain = true;
-      }
-
-      if (isChain) {
-        this.error('Multiple expressions are not allowed.');
-      }
-    }
-
-    return expressions.length === 1 ? expressions[0] : new Chain(expressions);
-  };
-
-  ParserImplementation.prototype.parseBindingBehavior = function parseBindingBehavior() {
-    var result = this.parseValueConverter();
-
-    while (this.optional('&')) {
-      var name = this.peek.text;
-      var args = [];
-
-      this.advance();
-
-      while (this.optional(':')) {
-        args.push(this.parseExpression());
-      }
-
-      result = new BindingBehavior(result, name, args);
-    }
-
-    return result;
-  };
-
-  ParserImplementation.prototype.parseValueConverter = function parseValueConverter() {
-    var result = this.parseExpression();
-
-    while (this.optional('|')) {
-      var name = this.peek.text;
-      var args = [];
-
-      this.advance();
-
-      while (this.optional(':')) {
-        args.push(this.parseExpression());
-      }
-
-      result = new ValueConverter(result, name, args, [result].concat(args));
-    }
-
-    return result;
-  };
-
-  ParserImplementation.prototype.parseExpression = function parseExpression() {
-    var start = this.peek.index;
-    var result = this.parseConditional();
-
-    while (this.peek.text === '=') {
-      if (!result.isAssignable) {
-        var end = this.index < this.tokens.length ? this.peek.index : this.input.length;
-        var expression = this.input.substring(start, end);
-
-        this.error('Expression ' + expression + ' is not assignable');
-      }
-
-      this.expect('=');
-      result = new Assign(result, this.parseConditional());
-    }
-
-    return result;
-  };
-
-  ParserImplementation.prototype.parseConditional = function parseConditional() {
-    var start = this.peek.index;
-    var result = this.parseLogicalOr();
-
-    if (this.optional('?')) {
-      var yes = this.parseExpression();
-
-      if (!this.optional(':')) {
-        var end = this.index < this.tokens.length ? this.peek.index : this.input.length;
-        var expression = this.input.substring(start, end);
-
-        this.error('Conditional expression ' + expression + ' requires all 3 expressions');
-      }
-
-      var no = this.parseExpression();
-      result = new Conditional(result, yes, no);
-    }
-
-    return result;
-  };
-
-  ParserImplementation.prototype.parseLogicalOr = function parseLogicalOr() {
-    var result = this.parseLogicalAnd();
-
-    while (this.optional('||')) {
-      result = new Binary('||', result, this.parseLogicalAnd());
-    }
-
-    return result;
-  };
-
-  ParserImplementation.prototype.parseLogicalAnd = function parseLogicalAnd() {
-    var result = this.parseEquality();
-
-    while (this.optional('&&')) {
-      result = new Binary('&&', result, this.parseEquality());
-    }
-
-    return result;
-  };
-
-  ParserImplementation.prototype.parseEquality = function parseEquality() {
-    var result = this.parseRelational();
-
-    while (true) {
-      if (this.optional('==')) {
-        result = new Binary('==', result, this.parseRelational());
-      } else if (this.optional('!=')) {
-        result = new Binary('!=', result, this.parseRelational());
-      } else if (this.optional('===')) {
-        result = new Binary('===', result, this.parseRelational());
-      } else if (this.optional('!==')) {
-        result = new Binary('!==', result, this.parseRelational());
-      } else {
-        return result;
-      }
-    }
-  };
-
-  ParserImplementation.prototype.parseRelational = function parseRelational() {
-    var result = this.parseAdditive();
-
-    while (true) {
-      if (this.optional('<')) {
-        result = new Binary('<', result, this.parseAdditive());
-      } else if (this.optional('>')) {
-        result = new Binary('>', result, this.parseAdditive());
-      } else if (this.optional('<=')) {
-        result = new Binary('<=', result, this.parseAdditive());
-      } else if (this.optional('>=')) {
-        result = new Binary('>=', result, this.parseAdditive());
-      } else {
-        return result;
-      }
-    }
-  };
-
-  ParserImplementation.prototype.parseAdditive = function parseAdditive() {
-    var result = this.parseMultiplicative();
-
-    while (true) {
-      if (this.optional('+')) {
-        result = new Binary('+', result, this.parseMultiplicative());
-      } else if (this.optional('-')) {
-        result = new Binary('-', result, this.parseMultiplicative());
-      } else {
-        return result;
-      }
-    }
-  };
-
-  ParserImplementation.prototype.parseMultiplicative = function parseMultiplicative() {
-    var result = this.parsePrefix();
-
-    while (true) {
-      if (this.optional('*')) {
-        result = new Binary('*', result, this.parsePrefix());
-      } else if (this.optional('%')) {
-        result = new Binary('%', result, this.parsePrefix());
-      } else if (this.optional('/')) {
-        result = new Binary('/', result, this.parsePrefix());
-      } else {
-        return result;
-      }
-    }
-  };
-
-  ParserImplementation.prototype.parsePrefix = function parsePrefix() {
-    if (this.optional('+')) {
-      return this.parsePrefix();
-    } else if (this.optional('-')) {
-      return new Binary('-', new LiteralPrimitive(0), this.parsePrefix());
-    } else if (this.optional('!')) {
-      return new PrefixNot('!', this.parsePrefix());
-    }
-
-    return this.parseAccessOrCallMember();
-  };
-
-  ParserImplementation.prototype.parseAccessOrCallMember = function parseAccessOrCallMember() {
-    var result = this.parsePrimary();
-
-    while (true) {
-      if (this.optional('.')) {
-        var name = this.peek.text;
-
-        this.advance();
-
-        if (this.optional('(')) {
-          var args = this.parseExpressionList(')');
-          this.expect(')');
-          if (result instanceof AccessThis) {
-            result = new CallScope(name, args, result.ancestor);
-          } else {
-            result = new CallMember(result, name, args);
-          }
-        } else {
-          if (result instanceof AccessThis) {
-            result = new AccessScope(name, result.ancestor);
-          } else {
-            result = new AccessMember(result, name);
-          }
-        }
-      } else if (this.optional('[')) {
-        var key = this.parseExpression();
-        this.expect(']');
-        result = new AccessKeyed(result, key);
-      } else if (this.optional('(')) {
-        var _args = this.parseExpressionList(')');
-        this.expect(')');
-        result = new CallFunction(result, _args);
-      } else {
-        return result;
-      }
-    }
-  };
-
-  ParserImplementation.prototype.parsePrimary = function parsePrimary() {
-    if (this.optional('(')) {
-      var result = this.parseExpression();
-      this.expect(')');
-      return result;
-    } else if (this.optional('null')) {
-      return new LiteralPrimitive(null);
-    } else if (this.optional('undefined')) {
-      return new LiteralPrimitive(undefined);
-    } else if (this.optional('true')) {
-      return new LiteralPrimitive(true);
-    } else if (this.optional('false')) {
-      return new LiteralPrimitive(false);
-    } else if (this.optional('[')) {
-      var _elements = this.parseExpressionList(']');
-      this.expect(']');
-      return new LiteralArray(_elements);
-    } else if (this.peek.text === '{') {
-      return this.parseObject();
-    } else if (this.peek.key !== null && this.peek.key !== undefined) {
-      return this.parseAccessOrCallScope();
-    } else if (this.peek.value !== null && this.peek.value !== undefined) {
-      var value = this.peek.value;
-      this.advance();
-      return value instanceof String || typeof value === 'string' ? new LiteralString(value) : new LiteralPrimitive(value);
-    } else if (this.index >= this.tokens.length) {
-      throw new Error('Unexpected end of expression: ' + this.input);
-    } else {
-      this.error('Unexpected token ' + this.peek.text);
-    }
-  };
-
-  ParserImplementation.prototype.parseAccessOrCallScope = function parseAccessOrCallScope() {
-    var name = this.peek.key;
-
-    this.advance();
-
-    if (name === '$this') {
-      return new AccessThis(0);
-    }
-
-    var ancestor = 0;
-    while (name === '$parent') {
-      ancestor++;
-      if (this.optional('.')) {
-        name = this.peek.key;
-        this.advance();
-      } else if (this.peek === EOF || this.peek.text === '(' || this.peek.text === ')' || this.peek.text === '[' || this.peek.text === '}' || this.peek.text === ',' || this.peek.text === '|' || this.peek.text === '&') {
-        return new AccessThis(ancestor);
-      } else {
-        this.error('Unexpected token ' + this.peek.text);
-      }
-    }
-
-    if (this.optional('(')) {
-      var args = this.parseExpressionList(')');
-      this.expect(')');
-      return new CallScope(name, args, ancestor);
-    }
-
-    return new AccessScope(name, ancestor);
-  };
-
-  ParserImplementation.prototype.parseObject = function parseObject() {
-    var keys = [];
-    var values = [];
-
-    this.expect('{');
-
-    if (this.peek.text !== '}') {
-      do {
-        var peek = this.peek;
-        var value = peek.value;
-        keys.push(typeof value === 'string' ? value : peek.text);
-
-        this.advance();
-        if (peek.key && (this.peek.text === ',' || this.peek.text === '}')) {
-          --this.index;
-          values.push(this.parseAccessOrCallScope());
-        } else {
-          this.expect(':');
-          values.push(this.parseExpression());
-        }
-      } while (this.optional(','));
-    }
-
-    this.expect('}');
-
-    return new LiteralObject(keys, values);
-  };
-
-  ParserImplementation.prototype.parseExpressionList = function parseExpressionList(terminator) {
-    var result = [];
-
-    if (this.peek.text !== terminator) {
-      do {
-        result.push(this.parseExpression());
-      } while (this.optional(','));
-    }
-
-    return result;
-  };
-
-  ParserImplementation.prototype.optional = function optional(text) {
-    if (this.peek.text === text) {
-      this.advance();
-      return true;
-    }
-
-    return false;
-  };
-
-  ParserImplementation.prototype.expect = function expect(text) {
-    if (this.peek.text === text) {
-      this.advance();
-    } else {
-      this.error('Missing expected ' + text);
-    }
-  };
-
-  ParserImplementation.prototype.advance = function advance() {
-    this.index++;
-  };
-
-  ParserImplementation.prototype.error = function error(message) {
-    var location = this.index < this.tokens.length ? 'at column ' + (this.tokens[this.index].index + 1) + ' in' : 'at the end of the expression';
-
-    throw new Error('Parser Error: ' + message + ' ' + location + ' [' + this.input + ']');
-  };
-
-  _createClass(ParserImplementation, [{
-    key: 'peek',
-    get: function get() {
-      return this.index < this.tokens.length ? this.tokens[this.index] : EOF;
-    }
-  }]);
-
-  return ParserImplementation;
-}();
+var T_TokenMask = (1 << 6) - 1;
+
+var T_PrecedenceShift = 6;
+
+var T_Precedence = 7 << 6;
+
+var T_ClosingToken = 1 << 9;
+
+var T_AccessScopeTerminal = 1 << 10;
+var T_EndOfSource = 1 << 11 | T_AccessScopeTerminal;
+var T_Identifier = 1 << 12;
+var T_NumericLiteral = 1 << 13;
+var T_StringLiteral = 1 << 14;
+var T_IsBinaryOp = 1 << 15;
+var T_IsUnaryOp = 1 << 16;
+
+var T_FalseKeyword = 0;
+var T_TrueKeyword = 1;
+var T_NullKeyword = 2;
+var T_UndefinedKeyword = 3;
+var T_ThisScope = 4;
+var T_ParentScope = 5;
+
+var T_LeftParen = 6 | T_AccessScopeTerminal;
+var T_LeftBrace = 7;
+var T_Period = 8;
+var T_RightBrace = 9 | T_ClosingToken | T_AccessScopeTerminal;
+var T_RightParen = 10 | T_ClosingToken | T_AccessScopeTerminal;
+var T_Semicolon = 11;
+var T_Comma = 12 | T_AccessScopeTerminal;
+var T_LeftBracket = 13 | T_AccessScopeTerminal;
+var T_RightBracket = 14 | T_ClosingToken;
+var T_Colon = 15;
+var T_QuestionMark = 16;
+var T_SingleQuote = 17;
+var T_DoubleQuote = 18;
+
+var T_BindingBehavior = 19 | T_AccessScopeTerminal;
+var T_ValueConverter = 20 | T_AccessScopeTerminal;
+var T_LogicalOr = 21 | T_IsBinaryOp | 1 << T_PrecedenceShift;
+var T_LogicalAnd = 22 | T_IsBinaryOp | 2 << T_PrecedenceShift;
+var T_BitwiseXor = 23 | T_IsBinaryOp | 3 << T_PrecedenceShift;
+var T_LooseEqual = 24 | T_IsBinaryOp | 4 << T_PrecedenceShift;
+var T_LooseNotEqual = 25 | T_IsBinaryOp | 4 << T_PrecedenceShift;
+var T_StrictEqual = 26 | T_IsBinaryOp | 4 << T_PrecedenceShift;
+var T_StrictNotEqual = 27 | T_IsBinaryOp | 4 << T_PrecedenceShift;
+var T_LessThan = 28 | T_IsBinaryOp | 5 << T_PrecedenceShift;
+var T_GreaterThan = 29 | T_IsBinaryOp | 5 << T_PrecedenceShift;
+var T_LessThanOrEqual = 30 | T_IsBinaryOp | 5 << T_PrecedenceShift;
+var T_GreaterThanOrEqual = 31 | T_IsBinaryOp | 5 << T_PrecedenceShift;
+var T_Add = 32 | T_IsUnaryOp | T_IsBinaryOp | 6 << T_PrecedenceShift;
+var T_Subtract = 33 | T_IsUnaryOp | T_IsBinaryOp | 6 << T_PrecedenceShift;
+var T_Multiply = 34 | T_IsBinaryOp | 7 << T_PrecedenceShift;
+var T_Modulo = 35 | T_IsBinaryOp | 7 << T_PrecedenceShift;
+var T_Divide = 36 | T_IsBinaryOp | 7 << T_PrecedenceShift;
+var T_Assign = 37;
+var T_LogicalNot = 38 | T_IsUnaryOp;
+
+var KeywordLookup = Object.create(null, {
+  true: { value: T_TrueKeyword },
+  null: { value: T_NullKeyword },
+  false: { value: T_FalseKeyword },
+  undefined: { value: T_UndefinedKeyword },
+  $this: { value: T_ThisScope },
+  $parent: { value: T_ParentScope }
+});
+
+var TokenValues = [false, true, null, undefined, '$this', '$parent', '(', '{', '.', '}', ')', ';', ',', '[', ']', ':', '?', '\'', '"', '&', '|', '||', '&&', '^', '==', '!=', '===', '!==', '<', '>', '<=', '>=', '+', '-', '*', '%', '/', '=', '!'];
 
 var mapProto = Map.prototype;
 
@@ -3236,8 +3184,8 @@ function handleCapturedEvent(event) {
     }
     target = target.parentNode;
   }
-  for (var _i22 = orderedCallbacks.length - 1; _i22 >= 0 && !event.propagationStopped; _i22--) {
-    var orderedCallback = orderedCallbacks[_i22];
+  for (var _i21 = orderedCallbacks.length - 1; _i21 >= 0 && !event.propagationStopped; _i21--) {
+    var orderedCallback = orderedCallbacks[_i21];
     if ('handleEvent' in orderedCallback) {
       orderedCallback.handleEvent(event);
     } else {
@@ -3537,8 +3485,8 @@ var EventSubscriber = exports.EventSubscriber = function () {
     this.handler = callbackOrListener;
 
     var events = this.events;
-    for (var _i23 = 0, ii = events.length; ii > _i23; ++_i23) {
-      element.addEventListener(events[_i23], callbackOrListener);
+    for (var _i22 = 0, ii = events.length; ii > _i22; ++_i22) {
+      element.addEventListener(events[_i22], callbackOrListener);
     }
   };
 
@@ -3549,8 +3497,8 @@ var EventSubscriber = exports.EventSubscriber = function () {
     var element = this.element;
     var callbackOrListener = this.handler;
     var events = this.events;
-    for (var _i24 = 0, ii = events.length; ii > _i24; ++_i24) {
-      element.removeEventListener(events[_i24], callbackOrListener);
+    for (var _i23 = 0, ii = events.length; ii > _i23; ++_i23) {
+      element.removeEventListener(events[_i23], callbackOrListener);
     }
     this.element = this.handler = null;
   };
@@ -4203,8 +4151,8 @@ var SelectValueObserver = exports.SelectValueObserver = (_dec9 = subscriberColle
     var count = 0;
     var value = [];
 
-    for (var _i25 = 0, ii = options.length; _i25 < ii; _i25++) {
-      var _option = options.item(_i25);
+    for (var _i24 = 0, ii = options.length; _i24 < ii; _i24++) {
+      var _option = options.item(_i24);
       if (!_option.selected) {
         continue;
       }
@@ -4304,7 +4252,7 @@ var SelectValueObserver = exports.SelectValueObserver = (_dec9 = subscriberColle
       _this24.synchronizeOptions();
       _this24.synchronizeValue();
     });
-    this.domObserver.observe(this.element, { childList: true, subtree: true });
+    this.domObserver.observe(this.element, { childList: true, subtree: true, characterData: true });
   };
 
   SelectValueObserver.prototype.unbind = function unbind() {
@@ -4342,8 +4290,8 @@ var ClassObserver = exports.ClassObserver = function () {
 
     if (newValue !== null && newValue !== undefined && newValue.length) {
       names = newValue.split(/\s+/);
-      for (var _i26 = 0, length = names.length; _i26 < length; _i26++) {
-        name = names[_i26];
+      for (var _i25 = 0, length = names.length; _i25 < length; _i25++) {
+        name = names[_i25];
         if (name === '') {
           continue;
         }
@@ -4436,9 +4384,9 @@ var ComputedExpression = exports.ComputedExpression = function (_Expression19) {
 function createComputedObserver(obj, propertyName, descriptor, observerLocator) {
   var dependencies = descriptor.get.dependencies;
   if (!(dependencies instanceof ComputedExpression)) {
-    var _i27 = dependencies.length;
-    while (_i27--) {
-      dependencies[_i27] = observerLocator.parser.parse(dependencies[_i27]);
+    var _i26 = dependencies.length;
+    while (_i26--) {
+      dependencies[_i26] = observerLocator.parser.parse(dependencies[_i26]);
     }
     dependencies = descriptor.get.dependencies = new ComputedExpression(propertyName, dependencies);
   }
@@ -4757,8 +4705,8 @@ var ObserverLocator = exports.ObserverLocator = (_temp = _class12 = function () 
   };
 
   ObserverLocator.prototype.getAdapterObserver = function getAdapterObserver(obj, propertyName, descriptor) {
-    for (var _i28 = 0, ii = this.adapters.length; _i28 < ii; _i28++) {
-      var adapter = this.adapters[_i28];
+    for (var _i27 = 0, ii = this.adapters.length; _i27 < ii; _i27++) {
+      var adapter = this.adapters[_i27];
       var observer = adapter.getObserver(obj, propertyName, descriptor);
       if (observer) {
         return observer;

@@ -1,0 +1,141 @@
+<html>
+
+<head>
+  <style>
+    html {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 12px;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      box-sizing: border-box;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .main {
+      height: 100%;
+      width: 100%;
+      padding: 60px;
+      display: flex;
+      flex-flow: column nowrap;
+    }
+
+    .header {
+      display: flex;
+      flex-flow: row nowrap;
+    }
+
+    .content {
+      margin-top: 24px;
+    }
+    
+  </style>
+</head>
+
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"></script>
+  <script>
+    require.config({
+      baseUrl: ".",
+      paths: {
+        "aurelia-binding-new": "dist/amd/aurelia-binding"
+      }
+    });
+    require(["aurelia-binding-new"], function (binding) {
+      window.bindingNew = binding;
+    });
+    require(["aurelia-binding"], function (binding) {
+      window.bindingCurrent = binding;
+    });
+    var perfTest = function (parserCtor, iterations) {
+      var res;
+      var start = performance.now();
+      for (let i = 0; i < iterations; i++) {
+        res = new parserCtor().parse('\'foo\'');
+        res = new parserCtor().parse('\'\\\\\'');
+        res = new parserCtor().parse('\'\\\'\'');
+        res = new parserCtor().parse('\'"\'');
+        res = new parserCtor().parse('\'\\f\'');
+        res = new parserCtor().parse('\'\\n\'');
+        res = new parserCtor().parse('\'\\r\'');
+        res = new parserCtor().parse('\'\\t\'');
+        res = new parserCtor().parse('\'\\v\'');
+        res = new parserCtor().parse('true');
+        res = new parserCtor().parse('false');
+        res = new parserCtor().parse('null');
+        res = new parserCtor().parse('undefined');
+        res = new parserCtor().parse('0');
+        res = new parserCtor().parse('1');
+        res = new parserCtor().parse('2.2');
+        res = new parserCtor().parse('foo & bar');
+        res = new parserCtor().parse('foo & bar:x:y:z & baz:a:b:c');
+        res = new parserCtor().parse('foo & bar:x:y:z & baz:a:b:c & bar:x:y:z & baz:a:b:c & bar:x:y:z & baz:a:b:c & bar:x:y:z & baz:a:b:c');
+        res = new parserCtor().parse('foo | bar');
+        res = new parserCtor().parse('foo | bar:x:y:z | baz:a:b:c');
+        res = new parserCtor().parse('foo | bar:x:y:z | baz:a:b:c | bar:x:y:z | baz:a:b:c | bar:x:y:z | baz:a:b:c | bar:x:y:z | baz:a:b:c');
+        res = new parserCtor().parse('foo | bar:x:y:z & baz:a:b:c');
+        res = new parserCtor().parse('foo');
+        res = new parserCtor().parse('foo.bar');
+        res = new parserCtor().parse('foo.bar.foo.bar.foo.bar.foo.bar.foo.bar.foo.bar.foo.bar.foo.bar.foo.bar.foo.bar.foo.bar.foo.bar');
+        res = new parserCtor().parse('foo = bar');
+        res = new parserCtor().parse('foo = bar = baz');
+        res = new parserCtor().parse('foo = bar = baz = foo = bar = baz = foo = bar = baz = foo = bar = baz = foo = bar = baz');
+        res = new parserCtor().parse('foo(x)');
+        res = new parserCtor().parse('foo.bar(x)');
+        res = new parserCtor().parse('$this');
+        res = new parserCtor().parse('$this.foo');
+        res = new parserCtor().parse('$this()');
+        res = new parserCtor().parse('$this.foo(x)');
+        res = new parserCtor().parse('$this.foo(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z, $this.foo(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z))');
+        res = new parserCtor().parse('matcher.bind($parent)');
+        res = new parserCtor().parse('{parent: $parent}');
+        res = new parserCtor().parse('{parent: $parent, foo: bar, parent: $parent, foo: bar, parent: $parent, foo: bar, parent: $parent, foo: bar}');
+        res = new parserCtor().parse('{ foo, bar }');
+        res = new parserCtor().parse('foo ? bar : baz');
+        res = new parserCtor().parse('foo ? bar : (foo ? bar : (foo ? bar : (foo ? bar : (foo ? bar : (foo ? bar : baz)))))');
+        res = new parserCtor().parse('foo === true ? bar : (foo === true ? bar : (foo === true ? bar : (foo === true ? bar : (foo === true ? bar : (foo === true ? bar : baz)))))');
+      }
+      var end = performance.now();
+      return end - start;
+    }
+    var getIterations = function() {
+      return parseInt(document.querySelector("#iterations").value, 10);
+    }
+  </script>
+  <div class="main">
+    <div class="header">
+      <input type="number" id="iterations" value=1000>
+      <button id="test">Test</button>
+    </div>
+    <div class="content">
+      <table>
+        <thead>
+          <tr>
+            <td>Current parser</td>
+            <td>New parser</td>
+          </tr>
+        </thead>
+        <tbody id="results">
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+
+      document.querySelector("#test").addEventListener("click", function() {
+        var resultCurrent = parseInt(perfTest(bindingNew.Parser, getIterations()), 10);
+        var resultNew = parseInt(perfTest(bindingCurrent.Parser, getIterations()), 10);
+        var row = document.createElement("tr");
+        row.innerHTML = "<td>" + resultNew + "ms</td><td>" + resultCurrent + "ms</td>";
+        document.querySelector("#results").appendChild(row);
+      });
+  </script>
+</body>
+
+</html>
