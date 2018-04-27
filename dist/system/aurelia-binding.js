@@ -3,7 +3,7 @@
 System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aurelia-metadata'], function (_export, _context) {
   "use strict";
 
-  var LogManager, PLATFORM, DOM, TaskQueue, metadata, _typeof, _createClass, _dec, _dec2, _class, _dec3, _class2, _dec4, _class3, _dec5, _class5, _dec6, _class7, _dec7, _class8, _dec8, _class9, _dec9, _class10, _class12, _temp, _dec10, _class13, _class14, _temp2, targetContext, sourceContext, map, slotNames, versionSlotNames, i, queue, queued, nextId, minimumImmediate, frameBudget, isFlushRequested, immediate, arrayPool1, arrayPool2, poolUtilization, ExpressionObserver, EDIT_LEAVE, EDIT_UPDATE, EDIT_ADD, EDIT_DELETE, arraySplice, ModifyCollectionObserver, CollectionLengthObserver, pop, push, reverse, shift, sort, splice, unshift, ModifyArrayObserver, Expression, Chain, BindingBehavior, ValueConverter, Assign, Conditional, AccessThis, AccessScope, AccessMember, AccessKeyed, CallScope, CallMember, CallFunction, Binary, PrefixNot, LiteralPrimitive, LiteralString, LiteralArray, LiteralObject, _Unparser, ExpressionCloner, bindingMode, Parser, ParserImplementation, $EOF, $TAB, $LF, $VTAB, $FF, $CR, $SPACE, $BANG, $DQ, $$, $PERCENT, $AMPERSAND, $SQ, $LPAREN, $RPAREN, $STAR, $PLUS, $COMMA, $MINUS, $PERIOD, $SLASH, $COLON, $SEMICOLON, $LT, $EQ, $GT, $QUESTION, $0, $9, $A, $E, $Z, $LBRACKET, $BACKSLASH, $RBRACKET, $CARET, $_, $a, $e, $f, $n, $r, $t, $u, $v, $z, $LBRACE, $BAR, $RBRACE, $NBSP, T_TokenMask, T_PrecedenceShift, T_Precedence, T_ClosingToken, T_AccessScopeTerminal, T_EndOfSource, T_Identifier, T_NumericLiteral, T_StringLiteral, T_BinaryOperator, T_UnaryOperator, T_FalseKeyword, T_TrueKeyword, T_NullKeyword, T_UndefinedKeyword, T_ThisScope, T_ParentScope, T_LeftParen, T_LeftBrace, T_Period, T_RightBrace, T_RightParen, T_Semicolon, T_Comma, T_LeftBracket, T_RightBracket, T_Colon, T_QuestionMark, T_SingleQuote, T_DoubleQuote, T_BindingBehavior, T_ValueConverter, T_LogicalOr, T_LogicalAnd, T_BitwiseXor, T_LooseEqual, T_LooseNotEqual, T_StrictEqual, T_StrictNotEqual, T_LessThan, T_GreaterThan, T_LessThanOrEqual, T_GreaterThanOrEqual, T_Add, T_Subtract, T_Multiply, T_Modulo, T_Divide, T_Assign, T_LogicalNot, KeywordLookup, TokenValues, mapProto, ModifyMapObserver, CapturedHandlerEntry, DelegateHandlerEntry, DelegationEntryHandler, EventHandler, DefaultEventStrategy, delegationStrategy, EventManager, EventSubscriber, DirtyChecker, DirtyCheckProperty, logger, propertyAccessor, PrimitiveObserver, SetterObserver, XLinkAttributeObserver, dataAttributeAccessor, DataAttributeObserver, StyleObserver, ValueAttributeObserver, checkedArrayContext, checkedValueContext, CheckedObserver, selectArrayContext, SelectValueObserver, ClassObserver, ComputedExpression, svgElements, svgPresentationElements, svgPresentationAttributes, svgAnalyzer, createElement, elements, presentationElements, presentationAttributes, SVGAnalyzer, ObserverLocator, ObjectObservationAdapter, BindingExpression, Binding, CallExpression, Call, ValueConverterResource, BindingBehaviorResource, ListenerExpression, Listener, NameExpression, NameBinder, LookupFunctions, BindingEngine, setProto, ModifySetObserver, signals;
+  var LogManager, PLATFORM, DOM, TaskQueue, metadata, _typeof, _createClass, _dec, _dec2, _class, _dec3, _class2, _dec4, _class3, _dec5, _class5, _dec6, _class7, _dec7, _class8, _dec8, _class9, _dec9, _class10, _class12, _temp, _dec10, _class13, _class14, _temp2, targetContext, sourceContext, map, slotNames, versionSlotNames, i, queue, queued, nextId, minimumImmediate, frameBudget, isFlushRequested, immediate, arrayPool1, arrayPool2, poolUtilization, ExpressionObserver, EDIT_LEAVE, EDIT_UPDATE, EDIT_ADD, EDIT_DELETE, arraySplice, ModifyCollectionObserver, CollectionLengthObserver, pop, push, reverse, shift, sort, splice, unshift, ModifyArrayObserver, Expression, Chain, BindingBehavior, ValueConverter, Assign, Conditional, AccessThis, AccessScope, AccessMember, AccessKeyed, CallScope, CallMember, CallFunction, Binary, PrefixNot, LiteralPrimitive, LiteralString, LiteralArray, LiteralObject, _Unparser, ExpressionCloner, bindingMode, Parser, ParserImplementation, $EOF, $TAB, $LF, $VTAB, $FF, $CR, $SPACE, $BANG, $DQ, $$, $PERCENT, $AMPERSAND, $SQ, $LPAREN, $RPAREN, $STAR, $PLUS, $COMMA, $MINUS, $PERIOD, $SLASH, $COLON, $SEMICOLON, $LT, $EQ, $GT, $QUESTION, $0, $9, $A, $E, $Z, $LBRACKET, $BACKSLASH, $RBRACKET, $CARET, $_, $a, $e, $f, $n, $r, $t, $u, $v, $z, $LBRACE, $BAR, $RBRACE, $NBSP, T_TokenMask, T_PrecedenceShift, T_Precedence, T_ClosingToken, T_AccessScopeTerminal, T_EOF, T_Identifier, T_NumericLiteral, T_StringLiteral, T_BinaryOperator, T_UnaryOperator, T_FalseKeyword, T_TrueKeyword, T_NullKeyword, T_UndefinedKeyword, T_ThisScope, T_ParentScope, T_LParen, T_LBrace, T_Period, T_RBrace, T_RParen, T_Semicolon, T_Comma, T_LBracket, T_RBracket, T_Colon, T_Question, T_SQ, T_DQ, T_Ampersand, T_Bar, T_BarBar, T_AmpersandAmpersand, T_Caret, T_EqEq, T_BangEq, T_EqEqEq, T_BangEqEq, T_Lt, T_Gt, T_LtEq, T_GtEq, T_Plus, T_Minus, T_Star, T_Percent, T_Slash, T_Eq, T_Bang, KeywordLookup, TokenValues, mapProto, ModifyMapObserver, CapturedHandlerEntry, DelegateHandlerEntry, DelegationEntryHandler, EventHandler, DefaultEventStrategy, delegationStrategy, EventManager, EventSubscriber, DirtyChecker, DirtyCheckProperty, logger, propertyAccessor, PrimitiveObserver, SetterObserver, XLinkAttributeObserver, dataAttributeAccessor, DataAttributeObserver, StyleObserver, ValueAttributeObserver, checkedArrayContext, checkedValueContext, CheckedObserver, selectArrayContext, SelectValueObserver, ClassObserver, ComputedExpression, svgElements, svgPresentationElements, svgPresentationAttributes, svgAnalyzer, createElement, elements, presentationElements, presentationAttributes, SVGAnalyzer, ObserverLocator, ObjectObservationAdapter, BindingExpression, Binding, CallExpression, Call, ValueConverterResource, BindingBehaviorResource, ListenerExpression, Listener, NameExpression, NameBinder, LookupFunctions, BindingEngine, setProto, ModifySetObserver, signals;
 
   function _possibleConstructorReturn(self, call) {
     if (!self) {
@@ -2655,11 +2655,6 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
 
       _export('ParserImplementation', ParserImplementation = function () {
         _createClass(ParserImplementation, [{
-          key: 'currentChar',
-          get: function get() {
-            return this.input.charCodeAt(this.index);
-          }
-        }, {
           key: 'hasNext',
           get: function get() {
             return this.index < this.length;
@@ -2678,8 +2673,9 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           this.startIndex = 0;
           this.input = input;
           this.length = input.length;
-          this.currentToken = T_EndOfSource;
+          this.currentToken = T_EOF;
           this.tokenValue = undefined;
+          this.currentChar = input.charCodeAt(0);
         }
 
         ParserImplementation.prototype.parseChain = function parseChain() {
@@ -2688,7 +2684,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           var isChain = false;
           var expressions = [];
 
-          while (this.currentToken !== T_EndOfSource) {
+          while (this.currentToken !== T_EOF) {
             while (this.optional(T_Semicolon)) {
               isChain = true;
             }
@@ -2715,7 +2711,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         ParserImplementation.prototype.parseBindingBehavior = function parseBindingBehavior() {
           var result = this.parseValueConverter();
 
-          while (this.optional(T_BindingBehavior)) {
+          while (this.optional(T_Ampersand)) {
             var name = this.tokenValue;
             var args = [];
 
@@ -2734,7 +2730,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         ParserImplementation.prototype.parseValueConverter = function parseValueConverter() {
           var result = this.parseExpression();
 
-          while (this.optional(T_ValueConverter)) {
+          while (this.optional(T_Bar)) {
             var name = this.tokenValue;
             var args = [];
 
@@ -2754,7 +2750,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           var start = this.index;
           var result = this.parseConditional();
 
-          while (this.currentToken === T_Assign) {
+          while (this.currentToken === T_Eq) {
             if (!result.isAssignable) {
               var end = this.index < this.length ? this.index : this.length;
               var expression = this.input.slice(start, end);
@@ -2762,7 +2758,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
               this.error('Expression ' + expression + ' is not assignable');
             }
 
-            this.expect(T_Assign);
+            this.expect(T_Eq);
             result = new Assign(result, this.parseConditional());
           }
 
@@ -2773,7 +2769,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           var start = this.index;
           var result = this.parseBinary(0);
 
-          if (this.optional(T_QuestionMark)) {
+          if (this.optional(T_Question)) {
             var yes = this.parseExpression();
 
             if (!this.optional(T_Colon)) {
@@ -2814,11 +2810,11 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           if ((opToken & T_UnaryOperator) === T_UnaryOperator) {
             this.nextToken();
             switch (opToken) {
-              case T_Add:
+              case T_Plus:
                 return this.parseUnary();
-              case T_Subtract:
+              case T_Minus:
                 return new Binary('-', new LiteralPrimitive(0), this.parseUnary());
-              case T_LogicalNot:
+              case T_Bang:
                 return new PrefixNot('!', this.parseUnary());
             }
           }
@@ -2834,9 +2830,9 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
 
               this.nextToken();
 
-              if (this.optional(T_LeftParen)) {
-                var args = this.parseExpressionList(T_RightParen);
-                this.expect(T_RightParen);
+              if (this.optional(T_LParen)) {
+                var args = this.parseExpressionList(T_RParen);
+                this.expect(T_RParen);
                 if (result instanceof AccessThis) {
                   result = new CallScope(name, args, result.ancestor);
                 } else {
@@ -2849,13 +2845,13 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
                   result = new AccessMember(result, name);
                 }
               }
-            } else if (this.optional(T_LeftBracket)) {
+            } else if (this.optional(T_LBracket)) {
               var key = this.parseExpression();
-              this.expect(T_RightBracket);
+              this.expect(T_RBracket);
               result = new AccessKeyed(result, key);
-            } else if (this.optional(T_LeftParen)) {
-              var _args = this.parseExpressionList(T_RightParen);
-              this.expect(T_RightParen);
+            } else if (this.optional(T_LParen)) {
+              var _args = this.parseExpressionList(T_RParen);
+              this.expect(T_RParen);
               result = new CallFunction(result, _args);
             } else {
               return result;
@@ -2872,17 +2868,17 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
             case T_ThisScope:
               this.nextToken();
               return new AccessThis(0);
-            case T_LeftParen:
+            case T_LParen:
               this.nextToken();
               var result = this.parseExpression();
-              this.expect(T_RightParen);
+              this.expect(T_RParen);
               return result;
-            case T_LeftBracket:
+            case T_LBracket:
               this.nextToken();
-              var _elements = this.parseExpressionList(T_RightBracket);
-              this.expect(T_RightBracket);
+              var _elements = this.parseExpressionList(T_RBracket);
+              this.expect(T_RBracket);
               return new LiteralArray(_elements);
-            case T_LeftBrace:
+            case T_LBrace:
               return this.parseObject();
             case T_StringLiteral:
               {
@@ -2931,9 +2927,9 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
             }
           }
 
-          if (this.optional(T_LeftParen)) {
-            var args = this.parseExpressionList(T_RightParen);
-            this.expect(T_RightParen);
+          if (this.optional(T_LParen)) {
+            var args = this.parseExpressionList(T_RParen);
+            this.expect(T_RParen);
             return new CallScope(name, args, ancestor);
           }
 
@@ -2944,16 +2940,17 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           var keys = [];
           var values = [];
 
-          this.expect(T_LeftBrace);
+          this.expect(T_LBrace);
 
-          if (this.currentToken !== T_RightBrace) {
+          if (this.currentToken !== T_RBrace) {
             do {
               var prevIndex = this.index;
               var prevToken = this.currentToken;
               keys.push(this.tokenValue);
               this.nextToken();
-              if (prevToken === T_Identifier && (this.currentToken === T_Comma || this.currentToken === T_RightBrace)) {
+              if (prevToken === T_Identifier && (this.currentToken === T_Comma || this.currentToken === T_RBrace)) {
                 this.index = prevIndex;
+                this.currentChar = this.input.charCodeAt(this.index);
                 values.push(this.parseAccessOrCallScope());
               } else {
                 this.expect(T_Colon);
@@ -2962,7 +2959,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
             } while (this.optional(T_Comma));
           }
 
-          this.expect(T_RightBrace);
+          this.expect(T_RBrace);
 
           return new LiteralObject(keys, values);
         };
@@ -2984,27 +2981,26 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         };
 
         ParserImplementation.prototype.nextChar = function nextChar() {
-          this.index++;
+          return this.currentChar = this.input.charCodeAt(++this.index);
         };
 
         ParserImplementation.prototype.scanToken = function scanToken() {
           while (this.hasNext) {
             this.startIndex = this.index;
-            var char = this.currentChar;
 
-            if (char <= $SPACE) {
+            if (this.currentChar <= $SPACE) {
               this.nextChar();
               continue;
             }
 
-            if (isIdentifierStart(char)) {
+            if (isIdentifierStart(this.currentChar)) {
               return this.scanIdentifier();
             }
 
-            if (isDigit(char)) {
+            if (isDigit(this.currentChar)) {
               return this.scanNumber();
             }
-            switch (char) {
+            switch (this.currentChar) {
               case $PERIOD:
                 {
                   var nextChar = this.input.charCodeAt(this.index + 1);
@@ -3016,22 +3012,22 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
                 }
               case $LPAREN:
                 this.nextChar();
-                return T_LeftParen;
+                return T_LParen;
               case $RPAREN:
                 this.nextChar();
-                return T_RightParen;
+                return T_RParen;
               case $LBRACE:
                 this.nextChar();
-                return T_LeftBrace;
+                return T_LBrace;
               case $RBRACE:
                 this.nextChar();
-                return T_RightBrace;
+                return T_RBrace;
               case $LBRACKET:
                 this.nextChar();
-                return T_LeftBracket;
+                return T_LBracket;
               case $RBRACKET:
                 this.nextChar();
-                return T_RightBracket;
+                return T_RBracket;
               case $COMMA:
                 this.nextChar();
                 return T_Comma;
@@ -3046,42 +3042,42 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
                 return this.scanString();
               case $PLUS:
                 this.nextChar();
-                return T_Add;
+                return T_Plus;
               case $MINUS:
                 this.nextChar();
-                return T_Subtract;
+                return T_Minus;
               case $STAR:
                 this.nextChar();
-                return T_Multiply;
+                return T_Star;
               case $SLASH:
                 this.nextChar();
-                return T_Divide;
+                return T_Slash;
               case $PERCENT:
                 this.nextChar();
-                return T_Modulo;
+                return T_Percent;
               case $CARET:
                 this.nextChar();
-                return T_BitwiseXor;
+                return T_Caret;
               case $QUESTION:
                 this.nextChar();
-                return T_QuestionMark;
+                return T_Question;
               case $LT:
                 {
                   this.nextChar();
                   if (this.currentChar === $EQ) {
                     this.nextChar();
-                    return T_LessThanOrEqual;
+                    return T_LtEq;
                   }
-                  return T_LessThan;
+                  return T_Lt;
                 }
               case $GT:
                 {
                   this.nextChar();
                   if (this.currentChar === $EQ) {
                     this.nextChar();
-                    return T_GreaterThanOrEqual;
+                    return T_GtEq;
                   }
-                  return T_GreaterThan;
+                  return T_Gt;
                 }
               case $BANG:
                 {
@@ -3090,11 +3086,11 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
                     this.nextChar();
                     if (this.currentChar === $EQ) {
                       this.nextChar();
-                      return T_StrictNotEqual;
+                      return T_BangEqEq;
                     }
-                    return T_LooseNotEqual;
+                    return T_BangEq;
                   }
-                  return T_LogicalNot;
+                  return T_Bang;
                 }
               case $EQ:
                 {
@@ -3103,29 +3099,29 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
                     this.nextChar();
                     if (this.currentChar === $EQ) {
                       this.nextChar();
-                      return T_StrictEqual;
+                      return T_EqEqEq;
                     }
-                    return T_LooseEqual;
+                    return T_EqEq;
                   }
-                  return T_Assign;
+                  return T_Eq;
                 }
               case $AMPERSAND:
                 {
                   this.nextChar();
                   if (this.currentChar === $AMPERSAND) {
                     this.nextChar();
-                    return T_LogicalAnd;
+                    return T_AmpersandAmpersand;
                   }
-                  return T_BindingBehavior;
+                  return T_Ampersand;
                 }
               case $BAR:
                 {
                   this.nextChar();
                   if (this.currentChar === $BAR) {
                     this.nextChar();
-                    return T_LogicalOr;
+                    return T_BarBar;
                   }
-                  return T_ValueConverter;
+                  return T_Bar;
                 }
               case $NBSP:
                 this.nextChar();
@@ -3136,7 +3132,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
             return null;
           }
 
-          return T_EndOfSource;
+          return T_EOF;
         };
 
         ParserImplementation.prototype.scanIdentifier = function scanIdentifier() {
@@ -3161,7 +3157,6 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         ParserImplementation.prototype.scanNumber = function scanNumber() {
           var isFloat = false;
           var value = 0;
-          var char = this.currentChar;
 
           while (isDigit(this.currentChar)) {
             value = value * 10 + (this.currentChar - $0);
@@ -3238,6 +3233,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
 
                   _unescaped = parseInt(hex, 16);
                   this.index += 4;
+                  this.currentChar = this.input.charCodeAt(this.index);
                 } else {
                   this.error('Unexpected token ' + this.tokenRaw);
                 }
@@ -3349,7 +3345,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
       T_Precedence = 7 << T_PrecedenceShift;
       T_ClosingToken = 1 << 9;
       T_AccessScopeTerminal = 1 << 10;
-      T_EndOfSource = 1 << 11 | T_AccessScopeTerminal;
+      T_EOF = 1 << 11 | T_AccessScopeTerminal;
       T_Identifier = 1 << 12;
       T_NumericLiteral = 1 << 13;
       T_StringLiteral = 1 << 14;
@@ -3361,39 +3357,39 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
       T_UndefinedKeyword = 3;
       T_ThisScope = 4;
       T_ParentScope = 5;
-      T_LeftParen = 6 | T_AccessScopeTerminal;
-      T_LeftBrace = 7;
+      T_LParen = 6 | T_AccessScopeTerminal;
+      T_LBrace = 7;
       T_Period = 8;
-      T_RightBrace = 9 | T_ClosingToken | T_AccessScopeTerminal;
-      T_RightParen = 10 | T_ClosingToken | T_AccessScopeTerminal;
+      T_RBrace = 9 | T_ClosingToken | T_AccessScopeTerminal;
+      T_RParen = 10 | T_ClosingToken | T_AccessScopeTerminal;
       T_Semicolon = 11;
       T_Comma = 12 | T_AccessScopeTerminal;
-      T_LeftBracket = 13 | T_AccessScopeTerminal;
-      T_RightBracket = 14 | T_ClosingToken;
+      T_LBracket = 13 | T_AccessScopeTerminal;
+      T_RBracket = 14 | T_ClosingToken;
       T_Colon = 15;
-      T_QuestionMark = 16;
-      T_SingleQuote = 17;
-      T_DoubleQuote = 18;
-      T_BindingBehavior = 19 | T_AccessScopeTerminal;
-      T_ValueConverter = 20 | T_AccessScopeTerminal;
-      T_LogicalOr = 21 | T_BinaryOperator | 1 << T_PrecedenceShift;
-      T_LogicalAnd = 22 | T_BinaryOperator | 2 << T_PrecedenceShift;
-      T_BitwiseXor = 23 | T_BinaryOperator | 3 << T_PrecedenceShift;
-      T_LooseEqual = 24 | T_BinaryOperator | 4 << T_PrecedenceShift;
-      T_LooseNotEqual = 25 | T_BinaryOperator | 4 << T_PrecedenceShift;
-      T_StrictEqual = 26 | T_BinaryOperator | 4 << T_PrecedenceShift;
-      T_StrictNotEqual = 27 | T_BinaryOperator | 4 << T_PrecedenceShift;
-      T_LessThan = 28 | T_BinaryOperator | 5 << T_PrecedenceShift;
-      T_GreaterThan = 29 | T_BinaryOperator | 5 << T_PrecedenceShift;
-      T_LessThanOrEqual = 30 | T_BinaryOperator | 5 << T_PrecedenceShift;
-      T_GreaterThanOrEqual = 31 | T_BinaryOperator | 5 << T_PrecedenceShift;
-      T_Add = 32 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
-      T_Subtract = 33 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
-      T_Multiply = 34 | T_BinaryOperator | 7 << T_PrecedenceShift;
-      T_Modulo = 35 | T_BinaryOperator | 7 << T_PrecedenceShift;
-      T_Divide = 36 | T_BinaryOperator | 7 << T_PrecedenceShift;
-      T_Assign = 37;
-      T_LogicalNot = 38 | T_UnaryOperator;
+      T_Question = 16;
+      T_SQ = 17;
+      T_DQ = 18;
+      T_Ampersand = 19 | T_AccessScopeTerminal;
+      T_Bar = 20 | T_AccessScopeTerminal;
+      T_BarBar = 21 | T_BinaryOperator | 1 << T_PrecedenceShift;
+      T_AmpersandAmpersand = 22 | T_BinaryOperator | 2 << T_PrecedenceShift;
+      T_Caret = 23 | T_BinaryOperator | 3 << T_PrecedenceShift;
+      T_EqEq = 24 | T_BinaryOperator | 4 << T_PrecedenceShift;
+      T_BangEq = 25 | T_BinaryOperator | 4 << T_PrecedenceShift;
+      T_EqEqEq = 26 | T_BinaryOperator | 4 << T_PrecedenceShift;
+      T_BangEqEq = 27 | T_BinaryOperator | 4 << T_PrecedenceShift;
+      T_Lt = 28 | T_BinaryOperator | 5 << T_PrecedenceShift;
+      T_Gt = 29 | T_BinaryOperator | 5 << T_PrecedenceShift;
+      T_LtEq = 30 | T_BinaryOperator | 5 << T_PrecedenceShift;
+      T_GtEq = 31 | T_BinaryOperator | 5 << T_PrecedenceShift;
+      T_Plus = 32 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+      T_Minus = 33 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+      T_Star = 34 | T_BinaryOperator | 7 << T_PrecedenceShift;
+      T_Percent = 35 | T_BinaryOperator | 7 << T_PrecedenceShift;
+      T_Slash = 36 | T_BinaryOperator | 7 << T_PrecedenceShift;
+      T_Eq = 37;
+      T_Bang = 38 | T_UnaryOperator;
       KeywordLookup = Object.create(null, {
         true: { value: T_TrueKeyword },
         null: { value: T_NullKeyword },

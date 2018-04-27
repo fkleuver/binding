@@ -2266,11 +2266,6 @@ export var Parser = function () {
 
 export var ParserImplementation = function () {
   _createClass(ParserImplementation, [{
-    key: 'currentChar',
-    get: function get() {
-      return this.input.charCodeAt(this.index);
-    }
-  }, {
     key: 'hasNext',
     get: function get() {
       return this.index < this.length;
@@ -2289,8 +2284,9 @@ export var ParserImplementation = function () {
     this.startIndex = 0;
     this.input = input;
     this.length = input.length;
-    this.currentToken = T_EndOfSource;
+    this.currentToken = T_EOF;
     this.tokenValue = undefined;
+    this.currentChar = input.charCodeAt(0);
   }
 
   ParserImplementation.prototype.parseChain = function parseChain() {
@@ -2299,7 +2295,7 @@ export var ParserImplementation = function () {
     var isChain = false;
     var expressions = [];
 
-    while (this.currentToken !== T_EndOfSource) {
+    while (this.currentToken !== T_EOF) {
       while (this.optional(T_Semicolon)) {
         isChain = true;
       }
@@ -2326,7 +2322,7 @@ export var ParserImplementation = function () {
   ParserImplementation.prototype.parseBindingBehavior = function parseBindingBehavior() {
     var result = this.parseValueConverter();
 
-    while (this.optional(T_BindingBehavior)) {
+    while (this.optional(T_Ampersand)) {
       var name = this.tokenValue;
       var args = [];
 
@@ -2345,7 +2341,7 @@ export var ParserImplementation = function () {
   ParserImplementation.prototype.parseValueConverter = function parseValueConverter() {
     var result = this.parseExpression();
 
-    while (this.optional(T_ValueConverter)) {
+    while (this.optional(T_Bar)) {
       var name = this.tokenValue;
       var args = [];
 
@@ -2365,7 +2361,7 @@ export var ParserImplementation = function () {
     var start = this.index;
     var result = this.parseConditional();
 
-    while (this.currentToken === T_Assign) {
+    while (this.currentToken === T_Eq) {
       if (!result.isAssignable) {
         var end = this.index < this.length ? this.index : this.length;
         var expression = this.input.slice(start, end);
@@ -2373,7 +2369,7 @@ export var ParserImplementation = function () {
         this.error('Expression ' + expression + ' is not assignable');
       }
 
-      this.expect(T_Assign);
+      this.expect(T_Eq);
       result = new Assign(result, this.parseConditional());
     }
 
@@ -2384,7 +2380,7 @@ export var ParserImplementation = function () {
     var start = this.index;
     var result = this.parseBinary(0);
 
-    if (this.optional(T_QuestionMark)) {
+    if (this.optional(T_Question)) {
       var yes = this.parseExpression();
 
       if (!this.optional(T_Colon)) {
@@ -2425,11 +2421,11 @@ export var ParserImplementation = function () {
     if ((opToken & T_UnaryOperator) === T_UnaryOperator) {
       this.nextToken();
       switch (opToken) {
-        case T_Add:
+        case T_Plus:
           return this.parseUnary();
-        case T_Subtract:
+        case T_Minus:
           return new Binary('-', new LiteralPrimitive(0), this.parseUnary());
-        case T_LogicalNot:
+        case T_Bang:
           return new PrefixNot('!', this.parseUnary());
       }
     }
@@ -2445,9 +2441,9 @@ export var ParserImplementation = function () {
 
         this.nextToken();
 
-        if (this.optional(T_LeftParen)) {
-          var args = this.parseExpressionList(T_RightParen);
-          this.expect(T_RightParen);
+        if (this.optional(T_LParen)) {
+          var args = this.parseExpressionList(T_RParen);
+          this.expect(T_RParen);
           if (result instanceof AccessThis) {
             result = new CallScope(name, args, result.ancestor);
           } else {
@@ -2460,13 +2456,13 @@ export var ParserImplementation = function () {
             result = new AccessMember(result, name);
           }
         }
-      } else if (this.optional(T_LeftBracket)) {
+      } else if (this.optional(T_LBracket)) {
         var key = this.parseExpression();
-        this.expect(T_RightBracket);
+        this.expect(T_RBracket);
         result = new AccessKeyed(result, key);
-      } else if (this.optional(T_LeftParen)) {
-        var _args = this.parseExpressionList(T_RightParen);
-        this.expect(T_RightParen);
+      } else if (this.optional(T_LParen)) {
+        var _args = this.parseExpressionList(T_RParen);
+        this.expect(T_RParen);
         result = new CallFunction(result, _args);
       } else {
         return result;
@@ -2483,17 +2479,17 @@ export var ParserImplementation = function () {
       case T_ThisScope:
         this.nextToken();
         return new AccessThis(0);
-      case T_LeftParen:
+      case T_LParen:
         this.nextToken();
         var result = this.parseExpression();
-        this.expect(T_RightParen);
+        this.expect(T_RParen);
         return result;
-      case T_LeftBracket:
+      case T_LBracket:
         this.nextToken();
-        var _elements = this.parseExpressionList(T_RightBracket);
-        this.expect(T_RightBracket);
+        var _elements = this.parseExpressionList(T_RBracket);
+        this.expect(T_RBracket);
         return new LiteralArray(_elements);
-      case T_LeftBrace:
+      case T_LBrace:
         return this.parseObject();
       case T_StringLiteral:
         {
@@ -2542,9 +2538,9 @@ export var ParserImplementation = function () {
       }
     }
 
-    if (this.optional(T_LeftParen)) {
-      var args = this.parseExpressionList(T_RightParen);
-      this.expect(T_RightParen);
+    if (this.optional(T_LParen)) {
+      var args = this.parseExpressionList(T_RParen);
+      this.expect(T_RParen);
       return new CallScope(name, args, ancestor);
     }
 
@@ -2555,16 +2551,17 @@ export var ParserImplementation = function () {
     var keys = [];
     var values = [];
 
-    this.expect(T_LeftBrace);
+    this.expect(T_LBrace);
 
-    if (this.currentToken !== T_RightBrace) {
+    if (this.currentToken !== T_RBrace) {
       do {
         var prevIndex = this.index;
         var prevToken = this.currentToken;
         keys.push(this.tokenValue);
         this.nextToken();
-        if (prevToken === T_Identifier && (this.currentToken === T_Comma || this.currentToken === T_RightBrace)) {
+        if (prevToken === T_Identifier && (this.currentToken === T_Comma || this.currentToken === T_RBrace)) {
           this.index = prevIndex;
+          this.currentChar = this.input.charCodeAt(this.index);
           values.push(this.parseAccessOrCallScope());
         } else {
           this.expect(T_Colon);
@@ -2573,7 +2570,7 @@ export var ParserImplementation = function () {
       } while (this.optional(T_Comma));
     }
 
-    this.expect(T_RightBrace);
+    this.expect(T_RBrace);
 
     return new LiteralObject(keys, values);
   };
@@ -2595,27 +2592,26 @@ export var ParserImplementation = function () {
   };
 
   ParserImplementation.prototype.nextChar = function nextChar() {
-    this.index++;
+    return this.currentChar = this.input.charCodeAt(++this.index);
   };
 
   ParserImplementation.prototype.scanToken = function scanToken() {
     while (this.hasNext) {
       this.startIndex = this.index;
-      var char = this.currentChar;
 
-      if (char <= $SPACE) {
+      if (this.currentChar <= $SPACE) {
         this.nextChar();
         continue;
       }
 
-      if (isIdentifierStart(char)) {
+      if (isIdentifierStart(this.currentChar)) {
         return this.scanIdentifier();
       }
 
-      if (isDigit(char)) {
+      if (isDigit(this.currentChar)) {
         return this.scanNumber();
       }
-      switch (char) {
+      switch (this.currentChar) {
         case $PERIOD:
           {
             var nextChar = this.input.charCodeAt(this.index + 1);
@@ -2627,22 +2623,22 @@ export var ParserImplementation = function () {
           }
         case $LPAREN:
           this.nextChar();
-          return T_LeftParen;
+          return T_LParen;
         case $RPAREN:
           this.nextChar();
-          return T_RightParen;
+          return T_RParen;
         case $LBRACE:
           this.nextChar();
-          return T_LeftBrace;
+          return T_LBrace;
         case $RBRACE:
           this.nextChar();
-          return T_RightBrace;
+          return T_RBrace;
         case $LBRACKET:
           this.nextChar();
-          return T_LeftBracket;
+          return T_LBracket;
         case $RBRACKET:
           this.nextChar();
-          return T_RightBracket;
+          return T_RBracket;
         case $COMMA:
           this.nextChar();
           return T_Comma;
@@ -2657,42 +2653,42 @@ export var ParserImplementation = function () {
           return this.scanString();
         case $PLUS:
           this.nextChar();
-          return T_Add;
+          return T_Plus;
         case $MINUS:
           this.nextChar();
-          return T_Subtract;
+          return T_Minus;
         case $STAR:
           this.nextChar();
-          return T_Multiply;
+          return T_Star;
         case $SLASH:
           this.nextChar();
-          return T_Divide;
+          return T_Slash;
         case $PERCENT:
           this.nextChar();
-          return T_Modulo;
+          return T_Percent;
         case $CARET:
           this.nextChar();
-          return T_BitwiseXor;
+          return T_Caret;
         case $QUESTION:
           this.nextChar();
-          return T_QuestionMark;
+          return T_Question;
         case $LT:
           {
             this.nextChar();
             if (this.currentChar === $EQ) {
               this.nextChar();
-              return T_LessThanOrEqual;
+              return T_LtEq;
             }
-            return T_LessThan;
+            return T_Lt;
           }
         case $GT:
           {
             this.nextChar();
             if (this.currentChar === $EQ) {
               this.nextChar();
-              return T_GreaterThanOrEqual;
+              return T_GtEq;
             }
-            return T_GreaterThan;
+            return T_Gt;
           }
         case $BANG:
           {
@@ -2701,11 +2697,11 @@ export var ParserImplementation = function () {
               this.nextChar();
               if (this.currentChar === $EQ) {
                 this.nextChar();
-                return T_StrictNotEqual;
+                return T_BangEqEq;
               }
-              return T_LooseNotEqual;
+              return T_BangEq;
             }
-            return T_LogicalNot;
+            return T_Bang;
           }
         case $EQ:
           {
@@ -2714,29 +2710,29 @@ export var ParserImplementation = function () {
               this.nextChar();
               if (this.currentChar === $EQ) {
                 this.nextChar();
-                return T_StrictEqual;
+                return T_EqEqEq;
               }
-              return T_LooseEqual;
+              return T_EqEq;
             }
-            return T_Assign;
+            return T_Eq;
           }
         case $AMPERSAND:
           {
             this.nextChar();
             if (this.currentChar === $AMPERSAND) {
               this.nextChar();
-              return T_LogicalAnd;
+              return T_AmpersandAmpersand;
             }
-            return T_BindingBehavior;
+            return T_Ampersand;
           }
         case $BAR:
           {
             this.nextChar();
             if (this.currentChar === $BAR) {
               this.nextChar();
-              return T_LogicalOr;
+              return T_BarBar;
             }
-            return T_ValueConverter;
+            return T_Bar;
           }
         case $NBSP:
           this.nextChar();
@@ -2747,7 +2743,7 @@ export var ParserImplementation = function () {
       return null;
     }
 
-    return T_EndOfSource;
+    return T_EOF;
   };
 
   ParserImplementation.prototype.scanIdentifier = function scanIdentifier() {
@@ -2772,7 +2768,6 @@ export var ParserImplementation = function () {
   ParserImplementation.prototype.scanNumber = function scanNumber() {
     var isFloat = false;
     var value = 0;
-    var char = this.currentChar;
 
     while (isDigit(this.currentChar)) {
       value = value * 10 + (this.currentChar - $0);
@@ -2849,6 +2844,7 @@ export var ParserImplementation = function () {
 
             _unescaped = parseInt(hex, 16);
             this.index += 4;
+            this.currentChar = this.input.charCodeAt(this.index);
           } else {
             this.error('Unexpected token ' + this.tokenRaw);
           }
@@ -2997,7 +2993,7 @@ var T_Precedence = 7 << T_PrecedenceShift;
 var T_ClosingToken = 1 << 9;
 
 var T_AccessScopeTerminal = 1 << 10;
-var T_EndOfSource = 1 << 11 | T_AccessScopeTerminal;
+var T_EOF = 1 << 11 | T_AccessScopeTerminal;
 var T_Identifier = 1 << 12;
 var T_NumericLiteral = 1 << 13;
 var T_StringLiteral = 1 << 14;
@@ -3011,40 +3007,40 @@ var T_UndefinedKeyword = 3;
 var T_ThisScope = 4;
 var T_ParentScope = 5;
 
-var T_LeftParen = 6 | T_AccessScopeTerminal;
-var T_LeftBrace = 7;
+var T_LParen = 6 | T_AccessScopeTerminal;
+var T_LBrace = 7;
 var T_Period = 8;
-var T_RightBrace = 9 | T_ClosingToken | T_AccessScopeTerminal;
-var T_RightParen = 10 | T_ClosingToken | T_AccessScopeTerminal;
+var T_RBrace = 9 | T_ClosingToken | T_AccessScopeTerminal;
+var T_RParen = 10 | T_ClosingToken | T_AccessScopeTerminal;
 var T_Semicolon = 11;
 var T_Comma = 12 | T_AccessScopeTerminal;
-var T_LeftBracket = 13 | T_AccessScopeTerminal;
-var T_RightBracket = 14 | T_ClosingToken;
+var T_LBracket = 13 | T_AccessScopeTerminal;
+var T_RBracket = 14 | T_ClosingToken;
 var T_Colon = 15;
-var T_QuestionMark = 16;
-var T_SingleQuote = 17;
-var T_DoubleQuote = 18;
+var T_Question = 16;
+var T_SQ = 17;
+var T_DQ = 18;
 
-var T_BindingBehavior = 19 | T_AccessScopeTerminal;
-var T_ValueConverter = 20 | T_AccessScopeTerminal;
-var T_LogicalOr = 21 | T_BinaryOperator | 1 << T_PrecedenceShift;
-var T_LogicalAnd = 22 | T_BinaryOperator | 2 << T_PrecedenceShift;
-var T_BitwiseXor = 23 | T_BinaryOperator | 3 << T_PrecedenceShift;
-var T_LooseEqual = 24 | T_BinaryOperator | 4 << T_PrecedenceShift;
-var T_LooseNotEqual = 25 | T_BinaryOperator | 4 << T_PrecedenceShift;
-var T_StrictEqual = 26 | T_BinaryOperator | 4 << T_PrecedenceShift;
-var T_StrictNotEqual = 27 | T_BinaryOperator | 4 << T_PrecedenceShift;
-var T_LessThan = 28 | T_BinaryOperator | 5 << T_PrecedenceShift;
-var T_GreaterThan = 29 | T_BinaryOperator | 5 << T_PrecedenceShift;
-var T_LessThanOrEqual = 30 | T_BinaryOperator | 5 << T_PrecedenceShift;
-var T_GreaterThanOrEqual = 31 | T_BinaryOperator | 5 << T_PrecedenceShift;
-var T_Add = 32 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
-var T_Subtract = 33 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
-var T_Multiply = 34 | T_BinaryOperator | 7 << T_PrecedenceShift;
-var T_Modulo = 35 | T_BinaryOperator | 7 << T_PrecedenceShift;
-var T_Divide = 36 | T_BinaryOperator | 7 << T_PrecedenceShift;
-var T_Assign = 37;
-var T_LogicalNot = 38 | T_UnaryOperator;
+var T_Ampersand = 19 | T_AccessScopeTerminal;
+var T_Bar = 20 | T_AccessScopeTerminal;
+var T_BarBar = 21 | T_BinaryOperator | 1 << T_PrecedenceShift;
+var T_AmpersandAmpersand = 22 | T_BinaryOperator | 2 << T_PrecedenceShift;
+var T_Caret = 23 | T_BinaryOperator | 3 << T_PrecedenceShift;
+var T_EqEq = 24 | T_BinaryOperator | 4 << T_PrecedenceShift;
+var T_BangEq = 25 | T_BinaryOperator | 4 << T_PrecedenceShift;
+var T_EqEqEq = 26 | T_BinaryOperator | 4 << T_PrecedenceShift;
+var T_BangEqEq = 27 | T_BinaryOperator | 4 << T_PrecedenceShift;
+var T_Lt = 28 | T_BinaryOperator | 5 << T_PrecedenceShift;
+var T_Gt = 29 | T_BinaryOperator | 5 << T_PrecedenceShift;
+var T_LtEq = 30 | T_BinaryOperator | 5 << T_PrecedenceShift;
+var T_GtEq = 31 | T_BinaryOperator | 5 << T_PrecedenceShift;
+var T_Plus = 32 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+var T_Minus = 33 | T_UnaryOperator | T_BinaryOperator | 6 << T_PrecedenceShift;
+var T_Star = 34 | T_BinaryOperator | 7 << T_PrecedenceShift;
+var T_Percent = 35 | T_BinaryOperator | 7 << T_PrecedenceShift;
+var T_Slash = 36 | T_BinaryOperator | 7 << T_PrecedenceShift;
+var T_Eq = 37;
+var T_Bang = 38 | T_UnaryOperator;
 
 var KeywordLookup = Object.create(null, {
   true: { value: T_TrueKeyword },
