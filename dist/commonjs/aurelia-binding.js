@@ -2808,16 +2808,22 @@ var ParserImplementation = exports.ParserImplementation = function () {
       this.nextChar();
     }
 
-    var nonDigitStart = this.index;
     if (this.currentChar === $PERIOD) {
-      isFloat = true;
       this.nextChar();
 
+      var decimalValue = 0;
+      var decimalPlaces = 0;
+
       while (isDigit(this.currentChar)) {
+        decimalValue = decimalValue * 10 + (this.currentChar - $0);
+        decimalPlaces++;
         this.nextChar();
       }
+
+      value += decimalValue / Math.pow(10, decimalPlaces);
     }
 
+    var nonDigitStart = this.index;
     if (this.currentChar === $e || this.currentChar === $E) {
       isFloat = true;
       var exponentStart = this.index;
