@@ -2181,7 +2181,6 @@ export const bindingMode = {
 };
 
 export class Parser {
-  cache;
   constructor() {
     this.cache = Object.create(null);
   }
@@ -2205,6 +2204,7 @@ export class ParserImplementation {
   constructor(input) {
     this.index = 0;
     this.startIndex = 0;
+    this.lastIndex = 0;
     this.input = input;
     this.length = input.length;
     this.currentToken = T_EOF;
@@ -2215,12 +2215,11 @@ export class ParserImplementation {
   parseChain() {
     this.nextToken();
 
-    let isChain = false;
     let expressions = [];
 
     while (this.currentToken !== T_EOF) {
-      while (this.optional(T_Semicolon)) {
-        isChain = true;
+      if (this.optional(T_Semicolon)) {
+        this.error('Multiple expressions are not allowed.');
       }
 
       if ((this.currentToken & T_ClosingToken) === T_ClosingToken) {
@@ -2230,11 +2229,7 @@ export class ParserImplementation {
       const expr = this.parseBindingBehavior();
       expressions.push(expr);
 
-      while (this.optional(T_Semicolon)) {
-        isChain = true;
-      }
-
-      if (isChain) {
+      if (this.optional(T_Semicolon)) {
         this.error('Multiple expressions are not allowed.');
       }
     }
@@ -2271,7 +2266,6 @@ export class ParserImplementation {
       this.nextToken();
 
       while (this.optional(T_Colon)) {
-        // todo(kasperl): Is this really supposed to be expressions?
         args.push(this.parseExpression());
       }
 
@@ -2282,13 +2276,11 @@ export class ParserImplementation {
   }
 
   parseExpression() {
-    let start = this.index;
     let result = this.parseConditional();
 
     while (this.currentToken === T_Eq) {
       if (!result.isAssignable) {
-        let end = (this.index < this.length) ? this.index : this.length;
-        let expression = this.input.slice(start, end);
+        let expression = this.input.slice(this.lastIndex, this.startIndex);
 
         this.error(`Expression ${expression} is not assignable`);
       }
@@ -2361,7 +2353,10 @@ export class ParserImplementation {
 
     while (true) { // eslint-disable-line no-constant-condition
       if (this.optional(T_Period)) {
-        let name = this.tokenValue; // todo(kasperl): Check that this is an identifier. Are keywords okay?
+        if ((this.currentToken ^ T_IdentifierOrKeyword) === T_IdentifierOrKeyword) {
+          this.error(`Unexpected token ${this.tokenRaw}`);
+        }
+        let name = this.tokenValue;
 
         this.nextToken();
 
@@ -2442,11 +2437,12 @@ export class ParserImplementation {
     }
   }
 
-  parseAccessOrCallScope()  {
-    let name = this.tokenValue;
-    let token = this.currentToken;
-
-    this.nextToken();
+  parseAccessOrCallScope(name, token)  {
+    if (!(name && token)) {
+      name = this.tokenValue;
+      token = this.currentToken;
+      this.nextToken();
+    }
 
     let ancestor = 0;
     while (token === T_ParentScope) {
@@ -2476,26 +2472,44 @@ export class ParserImplementation {
     let values = [];
 
     this.expect(T_LBrace);
+    let isComputed = false;
 
-    if (this.currentToken !== T_RBrace) {
-      do {
-        // todo(kasperl): Stricter checking. Only allow identifiers
-        // and strings as keys. Maybe also keywords?
-        const prevIndex = this.index;
-        const prevToken = this.currentToken;
-        keys.push(this.tokenValue);
-        this.nextToken();
-        if (prevToken === T_Identifier && (this.currentToken === T_Comma || this.currentToken === T_RBrace)) {
-          this.index = prevIndex;
-          this.currentChar = this.input.charCodeAt(this.index);
-          values.push(this.parseAccessOrCallScope());
-        } else {
+    while (this.currentToken !== T_RBrace) {
+      const token = this.currentToken;
+      const name = this.tokenValue;
+
+      switch(token) {
+        case T_Identifier:
+        // Treat keywords and predefined strings like identifiers
+        case T_FalseKeyword:
+        case T_TrueKeyword:
+        case T_NullKeyword:
+        case T_UndefinedKeyword:
+        case T_ThisScope:
+        case T_ParentScope:
+          keys.push(name);
+          this.nextToken();
+          if (this.optional(T_Colon)) {
+            values.push(this.parseExpression());
+          } else {
+            values.push(this.parseAccessOrCallScope(name, token));
+          }
+          break;
+        case T_StringLiteral:
+        case T_NumericLiteral:
+          keys.push(name);
+          this.nextToken();
           this.expect(T_Colon);
           values.push(this.parseExpression());
-        }
-      } while (this.optional(T_Comma));
+          break;
+        default:
+          this.error(`Unexpected token ${this.tokenRaw}`);
+      }
+      if (this.currentToken !== T_RBrace) {
+        this.expect(T_Comma);
+      }
     }
-
+    
     this.expect(T_RBrace);
 
     return new LiteralObject(keys, values);
@@ -2523,12 +2537,14 @@ export class ParserImplementation {
 
   scanToken() {
     while (this.hasNext) {
-      this.startIndex = this.index;
       // skip whitespace.
       if (this.currentChar <= $SPACE) {
         this.nextChar();
         continue;
       }
+
+      this.lastIndex = this.startIndex;
+      this.startIndex = this.index;
   
       // handle identifiers and numbers.
       if (isIdentifierStart(this.currentChar)) {
@@ -2814,7 +2830,7 @@ export class ParserImplementation {
   }
 
   error(message) {
-    throw new Error(`Lexer Error: ${message} at column ${this.index} in expression [${this.input}]`);
+    throw new Error(`Parser Error: ${message} at column ${this.startIndex} in expression [${this.input}]`);
   }
 
   optional(type) {
@@ -2826,12 +2842,11 @@ export class ParserImplementation {
     return false;
   }
 
-  expect(type) {
-    if (this.currentToken === type) {
+  expect(token) {
+    if (this.currentToken === token) {
       this.nextToken();
     } else {
-      // todo(fkleuver): translate to string value for readable error messages
-      this.error(`Missing expected token type ${type}`);
+      this.error(`Missing expected token ${TokenValues[token & T_TokenMask]}`);
     }
   }
 }
@@ -2942,18 +2957,19 @@ const T_ClosingToken        = 1 << 9;
 /** EndOfSource | '(' | '}' | ')' | ',' | '[' | '&' | '|' */
 const T_AccessScopeTerminal = 1 << 10;
 const T_EOF                 = 1 << 11 | T_AccessScopeTerminal;
-const T_Identifier          = 1 << 12;
+const T_Identifier          = 1 << 12 | T_IdentifierOrKeyword;
 const T_NumericLiteral      = 1 << 13;
 const T_StringLiteral       = 1 << 14;
 const T_BinaryOperator      = 1 << 15;
 const T_UnaryOperator       = 1 << 16;
+const T_IdentifierOrKeyword = 1 << 17;
 
-/** false */      const T_FalseKeyword     = 0;
-/** true */       const T_TrueKeyword      = 1;
-/** null */       const T_NullKeyword      = 2;
-/** undefined */  const T_UndefinedKeyword = 3;
-/** '$this' */    const T_ThisScope        = 4;
-/** '$parent' */  const T_ParentScope      = 5;
+/** false */      const T_FalseKeyword     = 0 | T_IdentifierOrKeyword;
+/** true */       const T_TrueKeyword      = 1 | T_IdentifierOrKeyword;
+/** null */       const T_NullKeyword      = 2 | T_IdentifierOrKeyword;
+/** undefined */  const T_UndefinedKeyword = 3 | T_IdentifierOrKeyword;
+/** '$this' */    const T_ThisScope        = 4 | T_IdentifierOrKeyword;
+/** '$parent' */  const T_ParentScope      = 5 | T_IdentifierOrKeyword;
 
 /** '(' */const T_LParen    =  6 | T_AccessScopeTerminal;
 /** '{' */const T_LBrace    =  7;

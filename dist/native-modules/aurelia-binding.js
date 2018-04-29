@@ -2282,6 +2282,7 @@ export var ParserImplementation = function () {
 
     this.index = 0;
     this.startIndex = 0;
+    this.lastIndex = 0;
     this.input = input;
     this.length = input.length;
     this.currentToken = T_EOF;
@@ -2292,12 +2293,11 @@ export var ParserImplementation = function () {
   ParserImplementation.prototype.parseChain = function parseChain() {
     this.nextToken();
 
-    var isChain = false;
     var expressions = [];
 
     while (this.currentToken !== T_EOF) {
-      while (this.optional(T_Semicolon)) {
-        isChain = true;
+      if (this.optional(T_Semicolon)) {
+        this.error('Multiple expressions are not allowed.');
       }
 
       if ((this.currentToken & T_ClosingToken) === T_ClosingToken) {
@@ -2307,11 +2307,7 @@ export var ParserImplementation = function () {
       var expr = this.parseBindingBehavior();
       expressions.push(expr);
 
-      while (this.optional(T_Semicolon)) {
-        isChain = true;
-      }
-
-      if (isChain) {
+      if (this.optional(T_Semicolon)) {
         this.error('Multiple expressions are not allowed.');
       }
     }
@@ -2358,13 +2354,11 @@ export var ParserImplementation = function () {
   };
 
   ParserImplementation.prototype.parseExpression = function parseExpression() {
-    var start = this.index;
     var result = this.parseConditional();
 
     while (this.currentToken === T_Eq) {
       if (!result.isAssignable) {
-        var end = this.index < this.length ? this.index : this.length;
-        var expression = this.input.slice(start, end);
+        var expression = this.input.slice(this.lastIndex, this.startIndex);
 
         this.error('Expression ' + expression + ' is not assignable');
       }
@@ -2437,6 +2431,9 @@ export var ParserImplementation = function () {
 
     while (true) {
       if (this.optional(T_Period)) {
+        if ((this.currentToken ^ T_IdentifierOrKeyword) === T_IdentifierOrKeyword) {
+          this.error('Unexpected token ' + this.tokenRaw);
+        }
         var name = this.tokenValue;
 
         this.nextToken();
@@ -2518,11 +2515,12 @@ export var ParserImplementation = function () {
     }
   };
 
-  ParserImplementation.prototype.parseAccessOrCallScope = function parseAccessOrCallScope() {
-    var name = this.tokenValue;
-    var token = this.currentToken;
-
-    this.nextToken();
+  ParserImplementation.prototype.parseAccessOrCallScope = function parseAccessOrCallScope(name, token) {
+    if (!(name && token)) {
+      name = this.tokenValue;
+      token = this.currentToken;
+      this.nextToken();
+    }
 
     var ancestor = 0;
     while (token === T_ParentScope) {
@@ -2552,22 +2550,41 @@ export var ParserImplementation = function () {
     var values = [];
 
     this.expect(T_LBrace);
+    var isComputed = false;
 
-    if (this.currentToken !== T_RBrace) {
-      do {
-        var prevIndex = this.index;
-        var prevToken = this.currentToken;
-        keys.push(this.tokenValue);
-        this.nextToken();
-        if (prevToken === T_Identifier && (this.currentToken === T_Comma || this.currentToken === T_RBrace)) {
-          this.index = prevIndex;
-          this.currentChar = this.input.charCodeAt(this.index);
-          values.push(this.parseAccessOrCallScope());
-        } else {
+    while (this.currentToken !== T_RBrace) {
+      var token = this.currentToken;
+      var name = this.tokenValue;
+
+      switch (token) {
+        case T_Identifier:
+        case T_FalseKeyword:
+        case T_TrueKeyword:
+        case T_NullKeyword:
+        case T_UndefinedKeyword:
+        case T_ThisScope:
+        case T_ParentScope:
+          keys.push(name);
+          this.nextToken();
+          if (this.optional(T_Colon)) {
+            values.push(this.parseExpression());
+          } else {
+            values.push(this.parseAccessOrCallScope(name, token));
+          }
+          break;
+        case T_StringLiteral:
+        case T_NumericLiteral:
+          keys.push(name);
+          this.nextToken();
           this.expect(T_Colon);
           values.push(this.parseExpression());
-        }
-      } while (this.optional(T_Comma));
+          break;
+        default:
+          this.error('Unexpected token ' + this.tokenRaw);
+      }
+      if (this.currentToken !== T_RBrace) {
+        this.expect(T_Comma);
+      }
     }
 
     this.expect(T_RBrace);
@@ -2597,12 +2614,13 @@ export var ParserImplementation = function () {
 
   ParserImplementation.prototype.scanToken = function scanToken() {
     while (this.hasNext) {
-      this.startIndex = this.index;
-
       if (this.currentChar <= $SPACE) {
         this.nextChar();
         continue;
       }
+
+      this.lastIndex = this.startIndex;
+      this.startIndex = this.index;
 
       if (isIdentifierStart(this.currentChar)) {
         return this.scanIdentifier();
@@ -2882,7 +2900,7 @@ export var ParserImplementation = function () {
   };
 
   ParserImplementation.prototype.error = function error(message) {
-    throw new Error('Lexer Error: ' + message + ' at column ' + this.index + ' in expression [' + this.input + ']');
+    throw new Error('Parser Error: ' + message + ' at column ' + this.startIndex + ' in expression [' + this.input + ']');
   };
 
   ParserImplementation.prototype.optional = function optional(type) {
@@ -2894,11 +2912,11 @@ export var ParserImplementation = function () {
     return false;
   };
 
-  ParserImplementation.prototype.expect = function expect(type) {
-    if (this.currentToken === type) {
+  ParserImplementation.prototype.expect = function expect(token) {
+    if (this.currentToken === token) {
       this.nextToken();
     } else {
-      this.error('Missing expected token type ' + type);
+      this.error('Missing expected token ' + TokenValues[token & T_TokenMask]);
     }
   };
 
@@ -3000,18 +3018,19 @@ var T_ClosingToken = 1 << 9;
 
 var T_AccessScopeTerminal = 1 << 10;
 var T_EOF = 1 << 11 | T_AccessScopeTerminal;
-var T_Identifier = 1 << 12;
+var T_Identifier = 1 << 12 | T_IdentifierOrKeyword;
 var T_NumericLiteral = 1 << 13;
 var T_StringLiteral = 1 << 14;
 var T_BinaryOperator = 1 << 15;
 var T_UnaryOperator = 1 << 16;
+var T_IdentifierOrKeyword = 1 << 17;
 
-var T_FalseKeyword = 0;
-var T_TrueKeyword = 1;
-var T_NullKeyword = 2;
-var T_UndefinedKeyword = 3;
-var T_ThisScope = 4;
-var T_ParentScope = 5;
+var T_FalseKeyword = 0 | T_IdentifierOrKeyword;
+var T_TrueKeyword = 1 | T_IdentifierOrKeyword;
+var T_NullKeyword = 2 | T_IdentifierOrKeyword;
+var T_UndefinedKeyword = 3 | T_IdentifierOrKeyword;
+var T_ThisScope = 4 | T_IdentifierOrKeyword;
+var T_ParentScope = 5 | T_IdentifierOrKeyword;
 
 var T_LParen = 6 | T_AccessScopeTerminal;
 var T_LBrace = 7;

@@ -3,7 +3,7 @@
 System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aurelia-metadata'], function (_export, _context) {
   "use strict";
 
-  var LogManager, PLATFORM, DOM, TaskQueue, metadata, _typeof, _createClass, _dec, _dec2, _class, _dec3, _class2, _dec4, _class3, _dec5, _class5, _dec6, _class7, _dec7, _class8, _dec8, _class9, _dec9, _class10, _class12, _temp, _dec10, _class13, _class14, _temp2, targetContext, sourceContext, map, slotNames, versionSlotNames, i, queue, queued, nextId, minimumImmediate, frameBudget, isFlushRequested, immediate, arrayPool1, arrayPool2, poolUtilization, ExpressionObserver, EDIT_LEAVE, EDIT_UPDATE, EDIT_ADD, EDIT_DELETE, arraySplice, ModifyCollectionObserver, CollectionLengthObserver, pop, push, reverse, shift, sort, splice, unshift, ModifyArrayObserver, Expression, Chain, BindingBehavior, ValueConverter, Assign, Conditional, AccessThis, AccessScope, AccessMember, AccessKeyed, CallScope, CallMember, CallFunction, Binary, PrefixNot, LiteralPrimitive, LiteralString, LiteralArray, LiteralObject, _Unparser, ExpressionCloner, bindingMode, Parser, ParserImplementation, $EOF, $TAB, $LF, $VTAB, $FF, $CR, $SPACE, $BANG, $DQ, $$, $PERCENT, $AMPERSAND, $SQ, $LPAREN, $RPAREN, $STAR, $PLUS, $COMMA, $MINUS, $PERIOD, $SLASH, $COLON, $SEMICOLON, $LT, $EQ, $GT, $QUESTION, $0, $9, $A, $E, $Z, $LBRACKET, $BACKSLASH, $RBRACKET, $CARET, $_, $a, $e, $f, $n, $r, $t, $u, $v, $z, $LBRACE, $BAR, $RBRACE, $NBSP, T_TokenMask, T_PrecedenceShift, T_Precedence, T_ClosingToken, T_AccessScopeTerminal, T_EOF, T_Identifier, T_NumericLiteral, T_StringLiteral, T_BinaryOperator, T_UnaryOperator, T_FalseKeyword, T_TrueKeyword, T_NullKeyword, T_UndefinedKeyword, T_ThisScope, T_ParentScope, T_LParen, T_LBrace, T_Period, T_RBrace, T_RParen, T_Semicolon, T_Comma, T_LBracket, T_RBracket, T_Colon, T_Question, T_SQ, T_DQ, T_Ampersand, T_Bar, T_BarBar, T_AmpersandAmpersand, T_Caret, T_EqEq, T_BangEq, T_EqEqEq, T_BangEqEq, T_Lt, T_Gt, T_LtEq, T_GtEq, T_Plus, T_Minus, T_Star, T_Percent, T_Slash, T_Eq, T_Bang, KeywordLookup, TokenValues, mapProto, ModifyMapObserver, CapturedHandlerEntry, DelegateHandlerEntry, DelegationEntryHandler, EventHandler, DefaultEventStrategy, delegationStrategy, EventManager, EventSubscriber, DirtyChecker, DirtyCheckProperty, logger, propertyAccessor, PrimitiveObserver, SetterObserver, XLinkAttributeObserver, dataAttributeAccessor, DataAttributeObserver, StyleObserver, ValueAttributeObserver, checkedArrayContext, checkedValueContext, CheckedObserver, selectArrayContext, SelectValueObserver, ClassObserver, ComputedExpression, svgElements, svgPresentationElements, svgPresentationAttributes, svgAnalyzer, createElement, elements, presentationElements, presentationAttributes, SVGAnalyzer, ObserverLocator, ObjectObservationAdapter, BindingExpression, Binding, CallExpression, Call, ValueConverterResource, BindingBehaviorResource, ListenerExpression, Listener, NameExpression, NameBinder, LookupFunctions, BindingEngine, setProto, ModifySetObserver, signals;
+  var LogManager, PLATFORM, DOM, TaskQueue, metadata, _typeof, _createClass, _dec, _dec2, _class, _dec3, _class2, _dec4, _class3, _dec5, _class5, _dec6, _class7, _dec7, _class8, _dec8, _class9, _dec9, _class10, _class12, _temp, _dec10, _class13, _class14, _temp2, targetContext, sourceContext, map, slotNames, versionSlotNames, i, queue, queued, nextId, minimumImmediate, frameBudget, isFlushRequested, immediate, arrayPool1, arrayPool2, poolUtilization, ExpressionObserver, EDIT_LEAVE, EDIT_UPDATE, EDIT_ADD, EDIT_DELETE, arraySplice, ModifyCollectionObserver, CollectionLengthObserver, pop, push, reverse, shift, sort, splice, unshift, ModifyArrayObserver, Expression, Chain, BindingBehavior, ValueConverter, Assign, Conditional, AccessThis, AccessScope, AccessMember, AccessKeyed, CallScope, CallMember, CallFunction, Binary, PrefixNot, LiteralPrimitive, LiteralString, LiteralArray, LiteralObject, _Unparser, ExpressionCloner, bindingMode, Parser, ParserImplementation, $EOF, $TAB, $LF, $VTAB, $FF, $CR, $SPACE, $BANG, $DQ, $$, $PERCENT, $AMPERSAND, $SQ, $LPAREN, $RPAREN, $STAR, $PLUS, $COMMA, $MINUS, $PERIOD, $SLASH, $COLON, $SEMICOLON, $LT, $EQ, $GT, $QUESTION, $0, $9, $A, $E, $Z, $LBRACKET, $BACKSLASH, $RBRACKET, $CARET, $_, $a, $e, $f, $n, $r, $t, $u, $v, $z, $LBRACE, $BAR, $RBRACE, $NBSP, T_TokenMask, T_PrecedenceShift, T_Precedence, T_ClosingToken, T_AccessScopeTerminal, T_EOF, T_Identifier, T_NumericLiteral, T_StringLiteral, T_BinaryOperator, T_UnaryOperator, T_IdentifierOrKeyword, T_FalseKeyword, T_TrueKeyword, T_NullKeyword, T_UndefinedKeyword, T_ThisScope, T_ParentScope, T_LParen, T_LBrace, T_Period, T_RBrace, T_RParen, T_Semicolon, T_Comma, T_LBracket, T_RBracket, T_Colon, T_Question, T_SQ, T_DQ, T_Ampersand, T_Bar, T_BarBar, T_AmpersandAmpersand, T_Caret, T_EqEq, T_BangEq, T_EqEqEq, T_BangEqEq, T_Lt, T_Gt, T_LtEq, T_GtEq, T_Plus, T_Minus, T_Star, T_Percent, T_Slash, T_Eq, T_Bang, KeywordLookup, TokenValues, mapProto, ModifyMapObserver, CapturedHandlerEntry, DelegateHandlerEntry, DelegationEntryHandler, EventHandler, DefaultEventStrategy, delegationStrategy, EventManager, EventSubscriber, DirtyChecker, DirtyCheckProperty, logger, propertyAccessor, PrimitiveObserver, SetterObserver, XLinkAttributeObserver, dataAttributeAccessor, DataAttributeObserver, StyleObserver, ValueAttributeObserver, checkedArrayContext, checkedValueContext, CheckedObserver, selectArrayContext, SelectValueObserver, ClassObserver, ComputedExpression, svgElements, svgPresentationElements, svgPresentationAttributes, svgAnalyzer, createElement, elements, presentationElements, presentationAttributes, SVGAnalyzer, ObserverLocator, ObjectObservationAdapter, BindingExpression, Binding, CallExpression, Call, ValueConverterResource, BindingBehaviorResource, ListenerExpression, Listener, NameExpression, NameBinder, LookupFunctions, BindingEngine, setProto, ModifySetObserver, signals;
 
   function _possibleConstructorReturn(self, call) {
     if (!self) {
@@ -2671,6 +2671,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
 
           this.index = 0;
           this.startIndex = 0;
+          this.lastIndex = 0;
           this.input = input;
           this.length = input.length;
           this.currentToken = T_EOF;
@@ -2681,12 +2682,11 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         ParserImplementation.prototype.parseChain = function parseChain() {
           this.nextToken();
 
-          var isChain = false;
           var expressions = [];
 
           while (this.currentToken !== T_EOF) {
-            while (this.optional(T_Semicolon)) {
-              isChain = true;
+            if (this.optional(T_Semicolon)) {
+              this.error('Multiple expressions are not allowed.');
             }
 
             if ((this.currentToken & T_ClosingToken) === T_ClosingToken) {
@@ -2696,11 +2696,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
             var expr = this.parseBindingBehavior();
             expressions.push(expr);
 
-            while (this.optional(T_Semicolon)) {
-              isChain = true;
-            }
-
-            if (isChain) {
+            if (this.optional(T_Semicolon)) {
               this.error('Multiple expressions are not allowed.');
             }
           }
@@ -2747,13 +2743,11 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         };
 
         ParserImplementation.prototype.parseExpression = function parseExpression() {
-          var start = this.index;
           var result = this.parseConditional();
 
           while (this.currentToken === T_Eq) {
             if (!result.isAssignable) {
-              var end = this.index < this.length ? this.index : this.length;
-              var expression = this.input.slice(start, end);
+              var expression = this.input.slice(this.lastIndex, this.startIndex);
 
               this.error('Expression ' + expression + ' is not assignable');
             }
@@ -2826,6 +2820,9 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
 
           while (true) {
             if (this.optional(T_Period)) {
+              if ((this.currentToken ^ T_IdentifierOrKeyword) === T_IdentifierOrKeyword) {
+                this.error('Unexpected token ' + this.tokenRaw);
+              }
               var name = this.tokenValue;
 
               this.nextToken();
@@ -2907,11 +2904,12 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           }
         };
 
-        ParserImplementation.prototype.parseAccessOrCallScope = function parseAccessOrCallScope() {
-          var name = this.tokenValue;
-          var token = this.currentToken;
-
-          this.nextToken();
+        ParserImplementation.prototype.parseAccessOrCallScope = function parseAccessOrCallScope(name, token) {
+          if (!(name && token)) {
+            name = this.tokenValue;
+            token = this.currentToken;
+            this.nextToken();
+          }
 
           var ancestor = 0;
           while (token === T_ParentScope) {
@@ -2941,22 +2939,41 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           var values = [];
 
           this.expect(T_LBrace);
+          var isComputed = false;
 
-          if (this.currentToken !== T_RBrace) {
-            do {
-              var prevIndex = this.index;
-              var prevToken = this.currentToken;
-              keys.push(this.tokenValue);
-              this.nextToken();
-              if (prevToken === T_Identifier && (this.currentToken === T_Comma || this.currentToken === T_RBrace)) {
-                this.index = prevIndex;
-                this.currentChar = this.input.charCodeAt(this.index);
-                values.push(this.parseAccessOrCallScope());
-              } else {
+          while (this.currentToken !== T_RBrace) {
+            var token = this.currentToken;
+            var name = this.tokenValue;
+
+            switch (token) {
+              case T_Identifier:
+              case T_FalseKeyword:
+              case T_TrueKeyword:
+              case T_NullKeyword:
+              case T_UndefinedKeyword:
+              case T_ThisScope:
+              case T_ParentScope:
+                keys.push(name);
+                this.nextToken();
+                if (this.optional(T_Colon)) {
+                  values.push(this.parseExpression());
+                } else {
+                  values.push(this.parseAccessOrCallScope(name, token));
+                }
+                break;
+              case T_StringLiteral:
+              case T_NumericLiteral:
+                keys.push(name);
+                this.nextToken();
                 this.expect(T_Colon);
                 values.push(this.parseExpression());
-              }
-            } while (this.optional(T_Comma));
+                break;
+              default:
+                this.error('Unexpected token ' + this.tokenRaw);
+            }
+            if (this.currentToken !== T_RBrace) {
+              this.expect(T_Comma);
+            }
           }
 
           this.expect(T_RBrace);
@@ -2986,12 +3003,13 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
 
         ParserImplementation.prototype.scanToken = function scanToken() {
           while (this.hasNext) {
-            this.startIndex = this.index;
-
             if (this.currentChar <= $SPACE) {
               this.nextChar();
               continue;
             }
+
+            this.lastIndex = this.startIndex;
+            this.startIndex = this.index;
 
             if (isIdentifierStart(this.currentChar)) {
               return this.scanIdentifier();
@@ -3271,7 +3289,7 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
         };
 
         ParserImplementation.prototype.error = function error(message) {
-          throw new Error('Lexer Error: ' + message + ' at column ' + this.index + ' in expression [' + this.input + ']');
+          throw new Error('Parser Error: ' + message + ' at column ' + this.startIndex + ' in expression [' + this.input + ']');
         };
 
         ParserImplementation.prototype.optional = function optional(type) {
@@ -3283,11 +3301,11 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
           return false;
         };
 
-        ParserImplementation.prototype.expect = function expect(type) {
-          if (this.currentToken === type) {
+        ParserImplementation.prototype.expect = function expect(token) {
+          if (this.currentToken === token) {
             this.nextToken();
           } else {
-            this.error('Missing expected token type ' + type);
+            this.error('Missing expected token ' + TokenValues[token & T_TokenMask]);
           }
         };
 
@@ -3352,17 +3370,18 @@ System.register(['aurelia-logging', 'aurelia-pal', 'aurelia-task-queue', 'aureli
       T_ClosingToken = 1 << 9;
       T_AccessScopeTerminal = 1 << 10;
       T_EOF = 1 << 11 | T_AccessScopeTerminal;
-      T_Identifier = 1 << 12;
+      T_Identifier = 1 << 12 | T_IdentifierOrKeyword;
       T_NumericLiteral = 1 << 13;
       T_StringLiteral = 1 << 14;
       T_BinaryOperator = 1 << 15;
       T_UnaryOperator = 1 << 16;
-      T_FalseKeyword = 0;
-      T_TrueKeyword = 1;
-      T_NullKeyword = 2;
-      T_UndefinedKeyword = 3;
-      T_ThisScope = 4;
-      T_ParentScope = 5;
+      T_IdentifierOrKeyword = 1 << 17;
+      T_FalseKeyword = 0 | T_IdentifierOrKeyword;
+      T_TrueKeyword = 1 | T_IdentifierOrKeyword;
+      T_NullKeyword = 2 | T_IdentifierOrKeyword;
+      T_UndefinedKeyword = 3 | T_IdentifierOrKeyword;
+      T_ThisScope = 4 | T_IdentifierOrKeyword;
+      T_ParentScope = 5 | T_IdentifierOrKeyword;
       T_LParen = 6 | T_AccessScopeTerminal;
       T_LBrace = 7;
       T_Period = 8;
