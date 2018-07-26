@@ -1,4 +1,4 @@
-import './setup';
+
 import {DirtyCheckProperty} from '../src/dirty-checking';
 import {
 	executeSharedPropertyObserverTests,

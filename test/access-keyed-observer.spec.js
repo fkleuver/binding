@@ -1,4 +1,4 @@
-import './setup';
+
 import {DOM} from 'aurelia-pal';
 import {Container} from 'aurelia-dependency-injection';
 import {bindingMode} from '../src/binding-mode';

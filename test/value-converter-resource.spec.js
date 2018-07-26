@@ -1,4 +1,4 @@
-import './setup';
+
 import {ValueConverterResource} from '../src/value-converter-resource';
 
 describe('ValueConverterResource', () => {

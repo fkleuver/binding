@@ -1,4 +1,4 @@
-import './setup';
+
 import {ExpressionObserver} from '../src/expression-observer';
 import {AccessScope} from '../src/ast';
 import {createOverrideContext} from '../src/scope';

@@ -1,4 +1,4 @@
-import './setup';
+
 import {PLATFORM, DOM} from 'aurelia-pal';
 import {Container} from 'aurelia-dependency-injection';
 import {TaskQueue} from 'aurelia-task-queue';

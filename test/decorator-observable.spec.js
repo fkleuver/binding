@@ -1,4 +1,4 @@
-import './setup';
+
 import {observable} from '../src/decorator-observable.js';
 import {decorators} from 'aurelia-metadata';
 import {SetterObserver} from '../src/property-observation';

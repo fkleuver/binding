@@ -1,4 +1,4 @@
-import './setup';
+
 import {DOM} from 'aurelia-pal';
 import {bindingMode} from '../src/binding-mode';
 import {

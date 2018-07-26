@@ -1,4 +1,4 @@
-import './setup';
+
 import {DOM} from 'aurelia-pal';
 import {EventManager, delegationStrategy} from '../src/event-manager';
 

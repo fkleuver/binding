@@ -1,4 +1,4 @@
-import './setup';
+
 import {TestObservationAdapter} from './adapter';
 import {DirtyCheckProperty} from '../src/dirty-checking';
 import {SetterObserver} from '../src/property-observation';

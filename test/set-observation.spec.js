@@ -1,4 +1,4 @@
-import './setup';
+
 import {TaskQueue} from 'aurelia-task-queue';
 import {getSetObserver} from '../src/set-observation';
 

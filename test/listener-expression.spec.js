@@ -1,4 +1,4 @@
-import './setup';
+
 import {fireEvent, checkDelay} from './shared';
 import {Parser} from '../src/parser';
 import {EventManager} from '../src/event-manager';

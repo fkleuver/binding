@@ -1,4 +1,4 @@
-import './setup';
+
 import {createObserverLocator, checkDelay} from './shared';
 import {ModifyCollectionObserver} from '../src/collection-observation';
 
@@ -53,7 +53,7 @@ describe('addChangeRecord', () => {
 
   describe('splice record', () => {
     it('should not change index when deleting last item - splice(3, 1)', ()=> {
-      let array = array = ['1', '2', '3'];
+      let array = ['1', '2', '3'];
       let record = {
         type: 'splice',
         object: array,
@@ -68,7 +68,7 @@ describe('addChangeRecord', () => {
     });
 
     it('should set index of last item when index -1 - splice(-1, 1)', ()=> {
-      let array = array = ['1', '2', '3'];
+      let array = ['1', '2', '3'];
       let record = {
         type: 'splice',
         object: array,
@@ -83,7 +83,7 @@ describe('addChangeRecord', () => {
     });
 
     it('should set index of second last item when index -2 - splice(-2, 1)', ()=> {
-      let array = array = ['1', '2', '4'];
+      let array = ['1', '2', '4'];
         let record = {
          type: 'splice',
          object: array,
@@ -98,7 +98,7 @@ describe('addChangeRecord', () => {
     });
 
     it('should set index of second last item when index -1 and adding 1 - splice(-1, 0, "Foo")', ()=> {
-      let array = array = ['1', '2', '3', 'Foo', '4'];
+      let array = ['1', '2', '3', 'Foo', '4'];
         let record = {
          type: 'splice',
          object: array,
@@ -113,7 +113,7 @@ describe('addChangeRecord', () => {
     });
 
     it('should set index of third last item when index -2 and adding 1 - splice(-2, 0, "Foo")', ()=> {
-      let array = array = ['1', '2', 'Foo', '3', '4'];
+      let array = ['1', '2', 'Foo', '3', '4'];
         let record = {
          type: 'splice',
          object: array,
@@ -143,7 +143,7 @@ describe('addChangeRecord', () => {
     });
 
     it('should set index of second last item on index -1 removing 1 adding 1  - splice(-1, 1, "Foo")', ()=> {
-      let array = array = ['1', '2', '3', 'Foo'];
+      let array = ['1', '2', '3', 'Foo'];
       let record = {
        type: 'splice',
        object: array,
@@ -158,7 +158,7 @@ describe('addChangeRecord', () => {
     });
 
     it('should set index to array length minus added count when index bigger than array - splice(6, 0, "Foo")', ()=> {
-      let array = array = ['1', '2', '3', '4', 'Foo'];
+      let array = ['1', '2', '3', '4', 'Foo'];
       let record = {
        type: 'splice',
        object: array,

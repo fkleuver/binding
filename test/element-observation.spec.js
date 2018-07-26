@@ -1,4 +1,4 @@
-import './setup';
+
 import {SetterObserver} from '../src/property-observation';
 import {DirtyCheckProperty} from '../src/dirty-checking';
 import {

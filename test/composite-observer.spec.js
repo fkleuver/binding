@@ -1,4 +1,4 @@
-import './setup';
+
 import {bindingMode} from '../src/binding-mode';
 import {sourceContext} from '../src/connectable-binding';
 import {

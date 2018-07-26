@@ -1,4 +1,4 @@
-import './setup';
+
 import {
   createObserverLocator,
   createElement

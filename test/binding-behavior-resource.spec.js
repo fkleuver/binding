@@ -1,4 +1,4 @@
-import './setup';
+
 import {BindingBehaviorResource} from '../src/binding-behavior-resource';
 
 describe('BindingBehaviorResource', () => {
